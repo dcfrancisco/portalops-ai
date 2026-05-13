@@ -1,0 +1,91 @@
+portalops-shell {
+  display: block;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+}
+
+.portalops-shell {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(18, 108, 191, 0.18),
+      transparent 28%
+    ),
+    linear-gradient(135deg, #07111f 0%, #102947 45%, #f4f7fb 45%, #f4f7fb 100%);
+  border-radius: 20px;
+  color: #07111f;
+  padding: 24px;
+}
+
+.portalops-shell__hero {
+  color: #f4f7fb;
+  margin-bottom: 24px;
+  max-width: 720px;
+}
+
+.portalops-shell__eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+.portalops-shell__hero h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.05;
+  margin: 0 0 12px;
+}
+
+.portalops-shell__summary {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.portalops-shell__grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-bottom: 24px;
+}
+
+.portalops-shell__card,
+.portalops-shell__commands {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(16, 41, 71, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(7, 17, 31, 0.08);
+  padding: 18px;
+}
+
+.portalops-shell__card h2,
+.portalops-shell__commands h2 {
+  font-size: 1rem;
+  margin: 0 0 10px;
+}
+
+.portalops-shell__card p,
+.portalops-shell__commands li {
+  color: #314154;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.portalops-shell__card code {
+  background: #e9f1fb;
+  border-radius: 999px;
+  display: inline-block;
+  font-size: 0.85rem;
+  margin-top: 12px;
+  padding: 6px 10px;
+}
+
+.portalops-shell__commands ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+@media (max-width: 768px) {
+  .portalops-shell {
+    padding: 18px;
+  }
+}

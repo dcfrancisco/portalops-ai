@@ -1,0 +1,14 @@
+assemble:
+  - from: assets
+    into: static
+
+portalops-shell:
+  cssURLs:
+    - assets/style.css
+  friendlyURLMapping: portalops-shell
+  htmlElementName: portalops-shell
+  instanceable: true
+  name: PortalOps AI Shell
+  type: customElement
+  urls:
+    - assets/index.js
