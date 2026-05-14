@@ -6,6 +6,9 @@ import java.util.List;
 
 public interface WorkflowInspectionService {
 
+    public WorkflowInspectionResult inspectPendingWorkflows(
+            PortalOpsRequestContext context);
+
     public List<WorkflowSummary> getPendingWorkflows(
             PortalOpsRequestContext context);
 

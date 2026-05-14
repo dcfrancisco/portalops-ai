@@ -7,6 +7,8 @@ import com.portalops.api.knowledge.PortalKnowledgeService;
 import com.portalops.api.knowledge.PortalKnowledgeSnapshot;
 import com.portalops.api.service.PortalOpsFacade;
 import com.portalops.api.service.PortalOpsRequestContext;
+import com.portalops.api.workflow.WorkflowInspectionResult;
+import com.portalops.api.workflow.WorkflowInspectionService;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -17,6 +19,13 @@ public class PortalOpsFacadeComponent implements PortalOpsFacade {
     @Override
     public PortalOpsCommandResult execute(PortalOpsCommandRequest commandRequest) {
         return _commandRouter.route(commandRequest);
+    }
+
+    @Override
+    public WorkflowInspectionResult inspectPendingWorkflows(
+            PortalOpsRequestContext context) {
+
+        return _workflowInspectionService.inspectPendingWorkflows(context);
     }
 
     @Override
@@ -31,5 +40,8 @@ public class PortalOpsFacadeComponent implements PortalOpsFacade {
 
     @Reference
     private PortalKnowledgeService _portalKnowledgeService;
+
+    @Reference
+    private WorkflowInspectionService _workflowInspectionService;
 
 }
