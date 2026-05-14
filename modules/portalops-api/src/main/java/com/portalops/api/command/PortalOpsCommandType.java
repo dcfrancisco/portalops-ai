@@ -1,0 +1,13 @@
+package com.portalops.api.command;
+
+public enum PortalOpsCommandType {
+
+    SHOW_PERMISSIONS_RISKY,
+    SHOW_STALE_CONTENT,
+    SHOW_UNPUBLISHED_DRAFTS,
+    SHOW_WHO_CAN_PUBLISH_HOMEPAGE,
+    SHOW_WORKFLOWS_PENDING,
+    SHOW_WORKFLOWS_STUCK,
+    UNSUPPORTED
+
+}

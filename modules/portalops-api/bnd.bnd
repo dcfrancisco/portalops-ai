@@ -1,0 +1,11 @@
+Bundle-Name: PortalOps API
+Bundle-SymbolicName: com.portalops.api
+Bundle-Version: 1.0.0
+Export-Package: \
+	com.portalops.api.audit,\
+	com.portalops.api.command,\
+	com.portalops.api.content,\
+	com.portalops.api.permissions,\
+	com.portalops.api.policy,\
+	com.portalops.api.service,\
+	com.portalops.api.workflow
