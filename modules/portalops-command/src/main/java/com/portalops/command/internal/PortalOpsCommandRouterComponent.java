@@ -14,6 +14,8 @@ import com.portalops.api.permissions.PermissionFinding;
 import com.portalops.api.permissions.PermissionInspectionService;
 import com.portalops.api.policy.CommandAuthorizationDecision;
 import com.portalops.api.policy.CommandAuthorizer;
+import com.portalops.api.site.SiteFinding;
+import com.portalops.api.site.SiteInspectionService;
 import com.portalops.api.workflow.WorkflowInspectionService;
 import com.portalops.api.workflow.WorkflowSummary;
 
@@ -98,6 +100,12 @@ public class PortalOpsCommandRouterComponent implements CommandRouter {
             case "/show unpublished drafts":
                 commandType = PortalOpsCommandType.SHOW_UNPUBLISHED_DRAFTS;
                 break;
+            case "/show site anomalies":
+                commandType = PortalOpsCommandType.SHOW_SITE_ANOMALIES;
+                break;
+            case "/show orphaned pages":
+                commandType = PortalOpsCommandType.SHOW_ORPHANED_PAGES;
+                break;
             default:
                 commandType = PortalOpsCommandType.UNSUPPORTED;
                 break;
@@ -162,6 +170,18 @@ public class PortalOpsCommandRouterComponent implements CommandRouter {
                         _contentInspectionService.getUnpublishedDrafts(
                                 commandIntent.getContext()),
                         "Unpublished drafts");
+            case SHOW_SITE_ANOMALIES:
+                return _toSiteResult(
+                        PortalOpsCommandType.SHOW_SITE_ANOMALIES,
+                        _siteInspectionService.getSiteAnomalies(
+                                commandIntent.getContext()),
+                        "Site anomalies");
+            case SHOW_ORPHANED_PAGES:
+                return _toSiteResult(
+                        PortalOpsCommandType.SHOW_ORPHANED_PAGES,
+                        _siteInspectionService.getOrphanedPages(
+                                commandIntent.getContext()),
+                        "Orphaned pages");
             case UNSUPPORTED:
             default:
                 return new PortalOpsCommandResult(
@@ -202,6 +222,27 @@ public class PortalOpsCommandRouterComponent implements CommandRouter {
         return lines;
     }
 
+    private List<String> _toSiteLines(List<SiteFinding> siteFindings) {
+        List<String> lines = new ArrayList<>();
+
+        for (SiteFinding siteFinding : siteFindings) {
+            lines.add(
+                    siteFinding.getTitle() + " [" + siteFinding.getCategory() +
+                            "] - " + siteFinding.getDetail());
+        }
+
+        return lines;
+    }
+
+    private PortalOpsCommandResult _toSiteResult(
+            PortalOpsCommandType commandType, List<SiteFinding> siteFindings,
+            String title) {
+
+        return new PortalOpsCommandResult(
+                commandType, _toSiteLines(siteFindings),
+                "Returned " + siteFindings.size() + " item(s).", title);
+    }
+
     private PortalOpsCommandResult _toWorkflowResult(
             PortalOpsCommandType commandType, List<WorkflowSummary> workflowSummaries,
             String title) {
@@ -222,6 +263,9 @@ public class PortalOpsCommandRouterComponent implements CommandRouter {
 
     @Reference
     private PermissionInspectionService _permissionInspectionService;
+
+    @Reference
+    private SiteInspectionService _siteInspectionService;
 
     @Reference
     private WorkflowInspectionService _workflowInspectionService;

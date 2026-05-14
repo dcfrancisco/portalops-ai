@@ -2,7 +2,9 @@ package com.portalops.api.command;
 
 public enum PortalOpsCommandType {
 
+    SHOW_ORPHANED_PAGES,
     SHOW_PERMISSIONS_RISKY,
+    SHOW_SITE_ANOMALIES,
     SHOW_STALE_CONTENT,
     SHOW_UNPUBLISHED_DRAFTS,
     SHOW_WHO_CAN_PUBLISH_HOMEPAGE,

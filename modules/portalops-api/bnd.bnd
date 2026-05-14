@@ -5,7 +5,9 @@ Export-Package: \
 	com.portalops.api.audit,\
 	com.portalops.api.command,\
 	com.portalops.api.content,\
+	com.portalops.api.knowledge,\
 	com.portalops.api.permissions,\
 	com.portalops.api.policy,\
 	com.portalops.api.service,\
+	com.portalops.api.site,\
 	com.portalops.api.workflow
