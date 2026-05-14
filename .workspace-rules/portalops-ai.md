@@ -1,222 +1,8 @@
-# PortalOps AI – GitHub Copilot Instructions
-
-## Product Vision
-PortalOps AI is an enterprise portal operations platform for Liferay 7.4.
-
-This is NOT a generic AI chatbot or FAQ assistant.
-
-The platform provides operational intelligence, governance, analysis, and controlled actions for enterprise portal administration.
-
-Primary focus:
-- Workflow management
-- Permissions governance
-- Content governance
-- Site intelligence
-- Search diagnostics
-- Portal administration
-- Compliance and operational visibility
-
-Users should be able to ASK the platform to show things and DO things safely.
-
-Examples:
-- Show pending workflows
-- Show stale content
-- Show risky permissions
-- Show who can publish the homepage
-- Show orphaned pages
-- Export governance reports
-
-Future examples:
-- Reassign stalled workflows
-- Archive stale drafts
-- Trigger cleanup scans
-- Create approval tasks
-
----
-
-## Architecture Principles
-
-### Modular Design
-Design the system as modular capability packs.
-
-Avoid monolithic design.
-
-Example modules:
-- portalops-core
-- portalops-command
-- portalops-workflow
-- portalops-permissions
-- portalops-content
-- portalops-site
-- portalops-search
-- portalops-compliance
-- portalops-admin
-- portalops-liferay-adapter
-- portalops-audit
-- portalops-policy
-
-Modules should have clear responsibilities.
-
----
-
-### Liferay Integration
-Target platform:
-Liferay 7.4
-
-Use supported extension patterns.
-
-DO NOT modify or fork Liferay core.
-
-Prefer:
-- Headless APIs
-- service abstractions
-- client extensions
-- remote app integration
-- standard Liferay module development
-
-Avoid direct coupling to internal implementation details where possible.
-
----
-
-### AI Backend
-AI capabilities should be implemented in a separate Spring Boot backend.
-
-Use:
-- Java 21
-- Spring Boot
-- Spring AI
-
-Avoid embedding complex AI dependencies directly into Liferay OSGi modules unless required.
-
----
-
-### AI Provider Abstraction
-LLM providers must be pluggable.
-
-Examples:
-- OpenAI
-- Azure OpenAI
-- Anthropic
-- AWS Bedrock
-
-Do not hardcode provider-specific logic in business modules.
-
----
-
-### Vector Store Abstraction
-Vector storage should be optional and pluggable.
-
-Examples:
-- pgvector
-- Pinecone
-- OpenSearch
-- Azure AI Search
-
-RAG is optional, not mandatory for MVP.
-
----
-
-## Interaction Model
-
-This is NOT chatbot-first.
-
-Supported interaction modes:
-- structured commands
-- natural language requests
-- dashboards
-- reports
-- approval workflows
-
-Command examples:
-- /show workflows pending
-- /show permissions risky
-- /show stale content
-- /show site anomalies
-
-Commands should be parsed through a routing layer.
-
----
-
-## MVP Scope
-Initial MVP is READ-ONLY.
-
-Allowed:
-- inspect workflows
-- inspect permissions
-- inspect content health
-- generate reports
-- summarize findings
-
-NOT in MVP:
-- delete content
-- modify permissions
-- bulk publish
-- destructive actions
-
-Safe actions may be added later behind approvals.
-
----
-
-## Security Principles
-Enterprise-first design.
-
-Requirements:
-- RBAC awareness
-- audit logging
-- approval workflows for sensitive actions
-- no destructive actions without safeguards
-- traceability for AI-driven decisions
-
----
-
-## Code Design
-Prefer:
-- interface-driven design
-- clean architecture
-- dependency inversion
-- modular services
-- adapter pattern
-- provider abstractions
-
-Avoid:
-- tightly coupled service classes
-- giant controllers
-- provider-specific business logic
-- hardcoded credentials
-- direct API calls scattered across modules
-
----
-
-## LLM Usage
-Use AI where reasoning adds value:
-- summarization
-- explanation
-- recommendations
-- classification
-
-Do NOT use AI for deterministic data retrieval if backend logic is sufficient.
-
-Example:
-Fetch workflow data deterministically, then use AI to explain findings.
-
----
-
-## Output Expectations
-Generated code should be:
-- production-oriented
-- modular
-- enterprise maintainable
-- testable
-- extensible
-
-Avoid demo-only shortcuts unless explicitly requested.
-
 ---
 description: PortalOps AI product architecture and implementation rules
 globs:
   - modules/portalops-*
   - client-extensions/portalops-*
-  - portalops-ai/**
 alwaysApply: true
 ---
 
@@ -226,9 +12,9 @@ alwaysApply: true
 PortalOps AI is an enterprise portal operations platform for Liferay 7.4.
 
 This is NOT:
-- a generic chatbot
+- a generic AI chatbot
 - an FAQ assistant
-- a demo AI playground
+- a demo playground
 
 This IS:
 - portal operations intelligence
@@ -237,80 +23,73 @@ This IS:
 - permissions analysis
 - content governance
 - operational dashboards
-- controlled action execution
+- controlled portal actions
 
 ---
 
 ## Product Scope
-Focus on portal management capabilities:
+PortalOps AI focuses on portal management.
 
-- workflow operations
+Primary domains:
+- workflow management
 - permissions governance
-- content hygiene
+- content governance
 - site intelligence
 - search diagnostics
 - portal administration
 - compliance insights
 
-Example user intents:
+Example requests:
 - Show pending workflows
 - Show stale content
 - Show risky permissions
-- Show who can publish a page
+- Show who can publish homepage
 - Show orphaned pages
 - Export governance reports
 
-Future controlled actions:
-- reassign workflows
-- archive stale drafts
-- trigger scans
-- create cleanup tasks
+Future actions:
+- Reassign stalled workflows
+- Archive stale drafts
+- Trigger governance scans
+- Create approval tasks
 
 ---
 
 ## Architecture
-PortalOps AI uses hybrid architecture.
+PortalOps AI is a Liferay-native modular product.
 
-### Liferay Layer
-Use Liferay for:
-- UI shell
-- authentication
-- RBAC integration
-- dashboard hosting
-- portal integration
-- client extensions
-- REST bridges
+Target platform:
+Liferay 7.4
 
-Prefer:
-- Client Extensions
-- Remote Apps
-- supported APIs
+Use standard Liferay workspace modular architecture.
 
-Avoid modifying Liferay core.
+Preferred module types:
+- API modules
+- Service modules
+- Web modules
+- MVC Portlets
+- REST modules
+- Client Extensions when appropriate
 
----
+Do NOT:
+- fork Liferay
+- modify Liferay core
+- depend on unsupported internal implementations
 
-### AI Backend
-AI logic must live in separate Spring Boot services.
-
-Preferred stack:
-- Java 21
-- Spring Boot
-- Spring AI
-
-Reason:
-Avoid heavy AI dependency coupling inside OSGi modules.
+Use supported Liferay APIs and service abstractions.
 
 ---
 
-## Modularity
-Design as modular capability packs.
+## Modular Design
+PortalOps AI must be modular.
 
-Examples:
+Example modules:
 
 Core:
-- portalops-core
-- portalops-command-router
+- portalops-api
+- portalops-service
+- portalops-web
+- portalops-command
 - portalops-audit
 - portalops-policy
 - portalops-config
@@ -324,41 +103,95 @@ Capabilities:
 - portalops-compliance
 - portalops-admin
 
-Adapters:
-- portalops-liferay-adapter
+AI:
 - portalops-llm-spi
+- portalops-llm-openai
+- portalops-llm-azure
+- portalops-llm-bedrock
+
+Optional:
 - portalops-vector-spi
+- portalops-vector-pgvector
+- portalops-vector-pinecone
+
+Modules must have clear responsibilities.
+
+Avoid monolithic design.
 
 ---
 
-## AI Interaction Model
-PortalOps AI is not chat-first.
+## AI Integration
+AI must integrate within Liferay modular architecture.
 
-Supported interaction:
+Preferred approach:
+- OSGi services
+- provider abstraction
+- service interfaces
+- adapter pattern
+
+Avoid introducing separate backend platforms in MVP unless clearly required.
+
+AI is an integrated capability, not a separate product.
+
+---
+
+## AI Providers
+LLM providers must be pluggable.
+
+Examples:
+- OpenAI
+- Azure OpenAI
+- Anthropic
+- AWS Bedrock
+
+Never hardcode provider-specific logic into business modules.
+
+---
+
+## Vector Stores
+Vector storage is optional.
+
+Examples:
+- pgvector
+- Pinecone
+- OpenSearch
+- Azure AI Search
+
+RAG is optional and not required for MVP.
+
+---
+
+## Interaction Model
+PortalOps AI is NOT chat-first.
+
+Supported interactions:
 - slash commands
 - natural language requests
 - dashboards
-- operational reports
+- reports
 - approval workflows
+- operational consoles
 
-Example commands:
+Examples:
 - /show workflows pending
 - /show permissions risky
 - /show stale content
 - /show site anomalies
 
-Commands should route through command handlers.
+Use command routing and domain handlers.
 
 ---
 
-## MVP Rules
-Initial MVP must be READ ONLY.
+## MVP Scope
+Initial MVP is READ ONLY.
 
 Allowed:
-- inspections
-- analysis
+- workflow inspection
+- permissions inspection
+- content analysis
+- reporting
 - summaries
-- reports
+- recommendations
 
 Disallowed:
 - deleting content
@@ -366,61 +199,57 @@ Disallowed:
 - bulk publishing
 - destructive automation
 
-Add write actions only after approval workflow exists.
-
----
-
-## AI Usage
-Use LLM reasoning only when useful:
-- summarization
-- explanation
-- recommendations
-- classification
-
-Do NOT use LLM for deterministic retrieval.
-
-Example:
-Query workflows using APIs, then summarize using AI.
+Write actions may be added only after approval workflows exist.
 
 ---
 
 ## Security
 Enterprise-first requirements:
-- audit logging
 - RBAC awareness
-- action approval controls
+- audit logging
+- approval controls
 - traceability
 - no hidden side effects
 
 ---
 
-## Code Design
-Prefer:
-- interface-driven architecture
-- clean modular design
-- provider abstraction
-- adapter pattern
-- testable services
+## AI Usage
+Use AI only where reasoning adds value:
+- summarization
+- explanation
+- recommendations
+- classification
 
-Avoid:
-- giant controllers
-- business logic in UI layers
-- hardcoded provider logic
-- direct API sprawl
+Do NOT use AI for deterministic retrieval.
+
+Example:
+Retrieve workflows using Liferay APIs, then use AI to explain findings.
 
 ---
 
-## Future Extensibility
-Support pluggable providers.
+## Code Design
+Prefer:
+- interface-driven design
+- modular OSGi architecture
+- service abstraction
+- adapter pattern
+- testable services
+- separation of concerns
 
-LLM:
-- OpenAI
-- Azure OpenAI
-- Anthropic
-- AWS Bedrock
+Avoid:
+- giant controllers
+- business logic in UI modules
+- tightly coupled provider implementations
+- unsupported shortcuts
+- direct provider API sprawl
 
-Vector:
-- pgvector
-- Pinecone
-- OpenSearch
-- Azure AI Search
+---
+
+## Output Expectations
+Generated code must be:
+- production-oriented
+- modular
+- maintainable
+- enterprise-ready
+- extensible
+- compatible with Liferay 7.4
