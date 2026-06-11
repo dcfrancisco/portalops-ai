@@ -1,0 +1,1 @@
+../../.workspace-rules/portalops-ai.md
