@@ -1,0 +1,44 @@
+services:
+  postgresql:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-lportal}
+      POSTGRES_USER: ${POSTGRES_USER:-liferay}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-liferay}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-liferay}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  liferay:
+    image: liferay/portal:7.4.3.132-ga132
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment:
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_DRIVER_CLASS_NAME: org.postgresql.Driver
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_URL: jdbc:postgresql://postgresql:5432/${POSTGRES_DB:-lportal}
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_USERNAME: ${POSTGRES_USER:-liferay}
+      LIFERAY_JDBC_PERIOD_DEFAULT_PERIOD_PASSWORD: ${POSTGRES_PASSWORD:-liferay}
+      LIFERAY_MODULE_PERIOD_FRAMEWORK_PERIOD_PROPERTIES_PERIOD_OSGI_PERIOD_CONSOLE: "0.0.0.0:11311"
+    ports:
+      - "8080:8080"
+      - "11311:11311"
+    volumes:
+      - liferay_data:/opt/liferay/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/c/portal/layout"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+
+volumes:
+  postgres_data:
+  liferay_data:
+
