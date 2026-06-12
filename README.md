@@ -1,33 +1,118 @@
 # PortalOps
 
-An Operational Intelligence Platform for Liferay.
+An AI-native Operational Intelligence Platform for Liferay.
 
-PortalOps provides operational intelligence, governance visibility, audit awareness, workflow insights, knowledge management, and AI-assisted analysis for Liferay environments.
-
-PortalOps helps portal engineers identify issues, understand impact, and take action.
+PortalOps combines portal knowledge, governance, operational data, reasoning, and actions into a unified administrative workspace. Instead of forcing administrators to navigate scattered menus, reports, and configuration screens, PortalOps lets them express intent and then investigates, analyzes, and presents the relevant findings, workspaces, and actions.
 
 This repository is currently Liferay-first and built as a native Liferay `portal-7.4-ga132` modular workspace.
 
-## PortalOps Principles
+## Vision
 
-PortalOps is operations-first.
+PortalOps is not a chatbot and not a traditional administration dashboard.
 
-PortalOps optimizes for:
+PortalOps is an operational intelligence platform that helps portal engineers, operations engineers, platform owners, administrators, and support teams understand what matters, why it matters, and what to do next.
 
-- Findings
-- Risks
-- Governance
-- Operational investigations
-- Recommendations
+The core operating model is:
+
+```text
+Intent -> Investigation -> Findings -> Workspace -> Actions
+```
+
+## Core Principles
+
+### Intent-Driven Administration
+
+Traditional portals require administrators to navigate multiple screens, reports, and configuration areas.
+
+PortalOps introduces an intent-driven model where users describe what they want to understand or accomplish.
+
+Examples:
+
+- Show users with excessive permissions
+- Review workflow health
+- Find stale content
+- Analyze search failures
+- Review inactive users
+
+PortalOps determines the appropriate investigation and presents the relevant operational information.
+
+### Operational Intelligence
+
+PortalOps combines:
+
+- Portal Knowledge
+- Governance Rules
+- Operational Data
+- AI Reasoning
+- Workspace Rendering
 - Actions
 
-PortalOps does not optimize for chat conversations.
+The goal is not to provide answers alone, but to support operational decision making.
 
-## Product Direction
+### Structured Outcomes
 
-PortalOps is not a monitoring dashboard, a generic chatbot, or an AI chat assistant.
+PortalOps does not rely solely on text responses.
 
-PortalOps is a modular operational intelligence platform with first-class product modules:
+Investigations produce structured outcomes that may include:
+
+- Summary
+- Findings
+- Recommendations
+- Actions
+- Workspace Components
+
+These outcomes are rendered within the PortalOps workspace.
+
+### Governance First
+
+PortalOps respects organizational governance.
+
+Recommendations and actions are evaluated against:
+
+- Security policies
+- Portal governance rules
+- Operational procedures
+- Organizational standards
+
+Governance remains authoritative over AI recommendations.
+
+## Architecture
+
+```mermaid
+flowchart TD
+    User["Administrator Intent"]
+    Assistant["PortalOps Intent Interface"]
+    Investigation["Investigation Engine"]
+    Knowledge["Knowledge Engine"]
+    Governance["Governance Engine"]
+    Data["Operational Data"]
+    Provider["OpenAI Provider"]
+    Vector["Vector Database"]
+    Outcome["Structured Outcome"]
+    Renderer["Workspace Renderer"]
+    Workspace["PortalOps Workspace"]
+    Actions["Operational Actions"]
+
+    User --> Assistant
+    Assistant --> Investigation
+    Investigation --> Knowledge
+    Investigation --> Governance
+    Investigation --> Data
+    Knowledge --> Vector
+    Investigation --> Provider
+    Investigation --> Outcome
+    Governance --> Outcome
+    Provider --> Outcome
+    Outcome --> Renderer
+    Renderer --> Workspace
+    Workspace --> Actions
+```
+
+## PortalOps Modules
+
+PortalOps remains a modular platform with first-class navigation.
+
+Current product modules:
 
 - Overview
 - Assistant
@@ -38,120 +123,117 @@ PortalOps is a modular operational intelligence platform with first-class produc
 - Audit
 - System Health
 
-Navigation remains first-class. The Assistant helps users investigate issues and navigate into the appropriate PortalOps module. It does not replace the rest of the product.
+The Assistant does not replace these modules. It helps users discover issues, launch investigations, and navigate into the appropriate operational workspace.
 
-## Architecture
+## Workspace Model
 
-```mermaid
-flowchart TD
-    User["Portal Engineer / Operations Engineer / Administrator"]
-    Assistant["PortalOps Assistant"]
-    Overview["PortalOps Overview"]
-    Analysis["PortalOps Analysis"]
-    Findings["Findings Cards"]
-    Recs["Recommendations"]
-    Actions["Actions"]
-    Modules["PortalOps Modules"]
-    Services["PortalOps Intelligence Services"]
-    Providers["AI Providers (Optional)"]
+PortalOps renders investigation outcomes within a workspace rather than relying only on conversational output.
 
-    User --> Overview
-    User --> Assistant
-    Assistant --> Analysis
-    Overview --> Findings
-    Analysis --> Services
-    Analysis --> Providers
-    Analysis --> Findings
-    Findings --> Recs
-    Recs --> Actions
-    Actions --> Modules
-```
+Potential workspace components include:
 
-## Core Concepts
+- Cards
+- Tables
+- Trees
+- Forms
+- Charts
+- Findings
+- Actions
 
-### Operational Intelligence
+AI does not generate user interfaces directly. AI and investigation services produce structured outcomes that the PortalOps renderer converts into operational user experiences.
 
-PortalOps treats operational work as investigations, not conversations.
+## Knowledge Layer
 
-Typical PortalOps questions include:
+PortalOps knowledge sources may include:
 
-- Analyze portal health
-- Show stale content
-- Review permission risks
-- Analyze search health
-- Explain failed workflows
-- Show recent changes
+- Liferay Documentation
+- Internal Runbooks
+- Operational Procedures
+- Governance Policies
+- Portal Administration Guides
+- Knowledge Base Articles
 
-PortalOps should answer:
+Knowledge is intended to be indexed into a vector database for retrieval and analysis.
 
-1. What did I find?
-2. Why does it matter?
-3. What should I do next?
+## Investigations
 
-Detailed narrative explanation is secondary.
+PortalOps translates user intent into operational investigations such as:
 
-### Response Model
+- Role Governance Investigation
+- Content Governance Investigation
+- Workflow Investigation
+- Search Investigation
+- Audit Investigation
+- System Health Investigation
 
-PortalOps responses are built from:
+Investigations produce structured outcomes rather than free-form answers.
 
-1. Summary
-2. Findings Cards
-3. Recommendations
-4. Actions
+## Skills and Tools
 
-Cards are reusable response primitives, not page-specific widgets.
+PortalOps introduces domain-specific skills that may orchestrate tools and APIs.
 
-Examples:
+Example skills:
 
-- `SearchFailureCard`
-- `StaleContentCard`
-- `PermissionRiskCard`
-- `WorkflowFailureCard`
-- `ConfigurationDriftCard`
-- `PolicyViolationCard`
+- Portal Administration Skill
+- Role Governance Skill
+- Workflow Analysis Skill
+- Search Analysis Skill
+- Content Governance Skill
+- Audit Skill
 
-These response components can be reused across:
+Example tools:
 
-- Overview
-- Assistant
-- Reports
-- Notifications
+- User APIs
+- Role APIs
+- Permission APIs
+- Workflow APIs
+- Search APIs
+- Content APIs
 
-### AI Provider Strategy
+Skills orchestrate tools and generate structured outcomes for the PortalOps workspace.
 
-PortalOps owns the user experience:
+## AI Provider Strategy
 
+PortalOps owns the operational experience:
+
+- Intent handling
+- Investigation structure
 - Response structure
-- Card taxonomy
+- Workspace components
 - Recommendations
 - Actions
 - Navigation semantics
 
-AI providers only supply analysis, correlation, summarization, and recommendations through a PortalOps-owned contract.
+AI providers contribute:
+
+- Reasoning
+- Correlation
+- Summarization
+- Retrieval-assisted analysis
 
 Current provider direction:
 
 - `portalops-ai-api`
 - `portalops-ai-openai`
 
-Future provider bundles can include:
+Planned supporting infrastructure includes:
 
-- `portalops-ai-claude`
-- `portalops-ai-ollama`
-- `portalops-ai-gemini`
-- `portalops-ai-oip`
+- OpenAI provider integration
+- Vector database for knowledge retrieval
+- Knowledge engine and governance engine composition
+
+Future providers can be added as separate OSGi bundles without changing the PortalOps experience.
 
 ## Module Layout
 
 The current module set is organized under [modules](modules):
 
 - `portalops-api`: shared interfaces, DTOs, knowledge models, and core contracts
-- `portalops-assistant-api`: deterministic assistant request and response contracts
-- `portalops-assistant-service`: assistant command routing and handler execution
+- `portalops-assistant-api`: assistant request and response contracts
+- `portalops-assistant-service`: assistant routing and handler execution
 - `portalops-ai-api`: provider-independent analysis contracts
 - `portalops-ai-openai`: initial OpenAI provider bundle scaffold
 - `portalops-audit`: audit event contracts and recording abstraction
-- `portalops-command`: existing command parsing and routing layer
+- `portalops-command`: command parsing and routing layer under evolution
 - `portalops-content`: content intelligence capability area
 - `portalops-knowledge`: structured portal knowledge aggregation
 - `portalops-llm-spi`: legacy provider abstraction area under transition
@@ -159,7 +241,7 @@ The current module set is organized under [modules](modules):
 - `portalops-policy`: authorization and guardrail abstractions
 - `portalops-service`: orchestration facade
 - `portalops-site`: site intelligence capability area
-- `portalops-web`: Liferay MVC module for Overview, Assistant, and product UI
+- `portalops-web`: Liferay MVC module for the PortalOps workspace
 - `portalops-workflow`: workflow intelligence capability area
 
 ## Repo Structure
@@ -258,14 +340,4 @@ Architecture docs:
 - [Assistant Architecture](docs/architecture/assistant-architecture.md)
 - [Response Model](docs/architecture/response-model.md)
 - [AI Provider Architecture](docs/architecture/ai-provider-architecture.md)
-- [Operational Intelligence Philosophy](docs/architecture/operational-intelligence.md)
-
-## Status
-
-Current maturity: Liferay-first prototype evolving into an operational intelligence platform with:
-
-- intelligence-first Overview design
-- dedicated Assistant module direction
-- deterministic assistant command execution foundation
-- provider-independent analysis contracts
-- modular capability areas for content, workflow, governance, audit, and system health
+- [Operational Intelligence](docs/architecture/operational-intelligence.md)
