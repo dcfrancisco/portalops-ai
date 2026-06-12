@@ -18,6 +18,7 @@ import com.portalops.assistant.api.AssistantStatus;
 import com.portalops.assistant.api.AssistantCommandRouter;
 import com.portalops.assistant.api.PortalOpsAssistantRequest;
 import com.portalops.assistant.api.PortalOpsAssistantResponse;
+import com.portalops.assistant.api.PortalOpsAssistantService;
 import com.portalops.assistant.api.payload.AssistantPayload;
 import com.portalops.assistant.api.payload.FailedWorkflowPayload;
 import com.portalops.assistant.api.payload.PermissionRiskPayload;
@@ -285,7 +286,7 @@ public class PortalOpsPortlet extends MVCPortlet {
         }
 
         if ("assistant".equals(activeScreen)) {
-            return "Use PortalOps Assistant to analyze operational findings, review risks, and navigate into the right module.";
+            return "Send a prompt to your configured AI provider and work directly in the PortalOps conversation.";
         }
 
         if ("settings".equals(activeScreen)) {
@@ -306,7 +307,7 @@ public class PortalOpsPortlet extends MVCPortlet {
         }
 
         if ("assistant".equals(activeScreen)) {
-            return "Operational Analysis";
+            return "AI Assistant";
         }
 
         return portalOpsDashboardData.getHeadline();
@@ -329,7 +330,7 @@ public class PortalOpsPortlet extends MVCPortlet {
         }
 
         if ("assistant".equals(activeScreen)) {
-            return "warning";
+            return "neutral";
         }
 
         return "success";
@@ -350,27 +351,16 @@ public class PortalOpsPortlet extends MVCPortlet {
                 return null;
             }
 
-            return _getSimulatedAssistantResponse(assistantPrompt);
+            return _portalOpsAssistantService.chat(
+                    assistantPrompt, portalOpsRequestContext);
         }
 
-        AssistantCommand assistantCommand = _resolveAssistantCommand(
-                renderRequest);
-
-        if (assistantPrompt.isEmpty() && (assistantCommand == null)) {
+        if (assistantPrompt.isEmpty()) {
             return null;
         }
 
-        if (assistantCommand == null) {
-            return _getSimulatedAssistantResponse(assistantPrompt);
-        }
-
-        return _assistantCommandRouter.route(
-                new PortalOpsAssistantRequest(
-                        assistantCommand,
-                        Map.of(
-                                "prompt",
-                                assistantPrompt),
-                        portalOpsRequestContext));
+        return _portalOpsAssistantService.chat(
+                assistantPrompt, portalOpsRequestContext);
     }
 
     private PortalOpsAnalysisResponse _getPortalOpsAnalysisResponse(
@@ -826,6 +816,6 @@ public class PortalOpsPortlet extends MVCPortlet {
     private PortalOpsDashboardDataProvider _portalOpsDashboardDataProvider;
 
     @Reference
-    private AssistantCommandRouter _assistantCommandRouter;
+    private PortalOpsAssistantService _portalOpsAssistantService;
 
 }

@@ -122,6 +122,48 @@ flowchart TD
     Workspace --> Actions
 ```
 
+## Agent Skill Tool Flow
+
+PortalOps uses a layered execution model for operational capabilities:
+
+```text
+PortalOps Assistant
+    ↓
+Agent
+    ↓
+Skill
+    ↓
+Tool
+    ↓
+Liferay API / Service
+```
+
+The first MVP vertical slice is user management:
+
+```text
+PortalOps Assistant
+    ↓
+UserManagementAgent
+    ↓
+GetUserCountSkill
+    ↓
+UserCountTool
+    ↓
+UserLocalService.getUsersCount()
+```
+
+Prompt example:
+
+```text
+How many users are in the portal?
+```
+
+Response example:
+
+```text
+There are 1245 users in the portal.
+```
+
 ## Modular Liferay Direction
 
 PortalOps should favor multiple Liferay OSGi intelligence modules rather than a single monolithic application.

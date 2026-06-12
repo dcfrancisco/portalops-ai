@@ -1,3 +1,5 @@
 Bundle-Name: PortalOps LLM SPI
 Bundle-SymbolicName: com.portalops.llm.spi
 Bundle-Version: 1.0.0
+Export-Package: \
+	com.portalops.llm.spi

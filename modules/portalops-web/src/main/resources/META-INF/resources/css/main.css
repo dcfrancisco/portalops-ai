@@ -166,7 +166,22 @@
 
 .portalops-assistant-page {
   display: grid;
-  gap: 1.5rem;
+  height: 100%;
+  min-height: 0;
+}
+
+.portalops-assistant-page-body {
+  display: grid;
+  gap: 1rem;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100%;
+  min-height: 0;
+  padding: 1.25rem;
+}
+
+.portalops-assistant-page-header {
+  display: grid;
+  gap: 0.35rem;
 }
 
 .portalops-dashboard-section {
@@ -322,12 +337,15 @@
 }
 
 .portalops-context-tab-panels {
+  display: grid;
   min-height: 0;
+  overflow: hidden;
 }
 
 .portalops-context-tab-panel {
   display: grid;
   gap: 0.75rem;
+  min-height: 0;
   padding: 1rem;
 }
 
@@ -350,17 +368,25 @@
 .portalops-context-assistant-response {
   display: grid;
   gap: 0.9rem;
+  justify-items: stretch;
   min-height: 0;
   overflow: auto;
+  overflow-x: hidden;
   padding-right: 0.15rem;
   scrollbar-gutter: stable;
 }
 
+.portalops-assistant-composer-shell,
 .portalops-context-assistant-composer {
   background: #f8f9fb;
   border: 1px solid #e2e5e9;
   border-radius: 0.9rem;
   padding: 0.9rem;
+}
+
+.portalops-assistant-composer-shell {
+  display: grid;
+  gap: 0.75rem;
 }
 
 .portalops-assistant-header,
@@ -369,13 +395,18 @@
 .portalops-assistant-insight {
   display: grid;
   gap: 0.75rem;
+  min-width: 0;
+  width: 100%;
 }
 
 .portalops-assistant-turn {
   border-bottom: 1px solid #edf0f2;
   display: grid;
   gap: 0.75rem;
+  justify-items: stretch;
+  min-width: 0;
   padding-bottom: 1rem;
+  width: 100%;
 }
 
 .portalops-assistant-turn:last-child {
@@ -428,6 +459,7 @@
   display: grid;
   gap: 0.75rem;
   grid-template-columns: minmax(0, 1fr) auto;
+  width: 100%;
 }
 
 .portalops-context-submit {
@@ -452,21 +484,28 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .portalops-assistant-prompt-chip {
   justify-content: center;
+  max-width: 100%;
+  white-space: normal;
 }
 
 .portalops-assistant-status {
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: 0.75rem;
 }
 
 .portalops-assistant-list-block {
   display: grid;
   gap: 0.45rem;
+  max-width: min(100%, 72rem);
+  min-width: 0;
+  width: 100%;
 }
 
 .portalops-assistant-list {
@@ -479,6 +518,11 @@
   display: grid;
   gap: 0.35rem;
   margin-bottom: 0;
+  max-width: min(100%, 72rem);
+  min-width: 0;
+  overflow-wrap: break-word;
+  width: 100%;
+  word-break: break-word;
 }
 
 .portalops-assistant-prompt-bubble {
@@ -486,14 +530,23 @@
   border: 1px solid #dbe4f0;
   border-radius: 0.9rem;
   justify-self: end;
-  max-width: 92%;
+  max-width: min(100%, 56rem);
   padding: 0.85rem 0.95rem;
+  width: fit-content;
 }
 
 .portalops-assistant-prompt-copy {
   color: #1c1c24;
   font-weight: 600;
   margin-top: 0.35rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.portalops-assistant-response-copy {
+  min-width: 0;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
   word-break: break-word;
 }
 
@@ -501,6 +554,52 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  min-width: 0;
+}
+
+.portalops-assistant-action-list .btn,
+.portalops-assistant-prompt-list .btn {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.portalops-assistant-conversation {
+  display: grid;
+  min-height: 0;
+  overflow: auto;
+  overflow-x: hidden;
+  padding-right: 0.25rem;
+  scrollbar-gutter: stable;
+}
+
+.portalops-assistant-loading {
+  color: #6b6c7e;
+  font-size: 0.875rem;
+}
+
+.portalops-assistant-insight pre,
+.portalops-assistant-insight code,
+.portalops-assistant-response-copy pre,
+.portalops-assistant-response-copy code {
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+}
+
+.portalops-assistant-insight pre,
+.portalops-assistant-response-copy pre {
+  background: #f8f9fb;
+  border: 1px solid #e2e5e9;
+  border-radius: 0.75rem;
+  margin: 0.75rem 0 0;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 0.9rem 1rem;
+  white-space: pre;
+}
+
+.portalops-assistant-insight code,
+.portalops-assistant-response-copy code {
+  overflow-wrap: anywhere;
 }
 
 .portalops-grid-assistant-metrics {
@@ -633,6 +732,7 @@
   .portalops-workbench-nav,
   .portalops-workbench-context,
   .portalops-workspace-body,
+  .portalops-assistant-conversation,
   .portalops-context-assistant-response,
   .portalops-context-tab-panel-scrollable {
     overflow: visible;
@@ -656,6 +756,15 @@
 }
 
 @media (max-width: 767px) {
+  .portalops-assistant-page {
+    height: auto;
+  }
+
+  .portalops-assistant-page-body {
+    grid-template-rows: auto auto auto;
+    height: auto;
+  }
+
   .portalops-assistant-prompt-row {
     grid-template-columns: 1fr;
   }

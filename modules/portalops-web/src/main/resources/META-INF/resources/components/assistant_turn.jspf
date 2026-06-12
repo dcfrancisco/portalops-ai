@@ -14,7 +14,7 @@ PortalOpsAssistantResponse<? extends AssistantPayload> assistantTurnResponse =
 
   <div class="alert alert-<%= (assistantTurnResponse.getStatus() == AssistantStatus.ERROR) ? "danger" : ((assistantTurnResponse.getStatus() == AssistantStatus.WARNING) ? "warning" : "info") %> portalops-assistant-alert" role="alert">
     <strong><%= HtmlUtil.escape(assistantTurnResponse.getTitle()) %></strong>
-    <span><%= HtmlUtil.escape(assistantTurnResponse.getSummary()) %></span>
+    <div class="portalops-assistant-response-copy"><%= HtmlUtil.escape(assistantTurnResponse.getSummary()) %></div>
   </div>
 
   <div class="portalops-assistant-list-block">

@@ -5,6 +5,7 @@ import com.liferay.application.list.PanelCategory;
 import com.liferay.application.list.constants.PanelCategoryKeys;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.language.LanguageUtil;
 
 import com.portalops.web.internal.constants.PortalOpsPanelCategoryKeys;
 
@@ -13,7 +14,8 @@ import org.osgi.service.component.annotations.Component;
 @Component(
     property = {
         "panel.category.key=" + PanelCategoryKeys.CONTROL_PANEL,
-        "panel.category.order:Integer=250"
+        "panel.category.order:Integer=250",
+        "javax.portlet.resource-bundle=content.Language"
     },
     service = PanelCategory.class
 )
@@ -26,7 +28,7 @@ public class PortalOpsPanelCategory extends BasePanelCategory {
 
     @Override
     public String getLabel(java.util.Locale locale) {
-        return "PortalOps";
+        return LanguageUtil.get(locale, "category.portalops");
     }
 
     @Override

@@ -227,6 +227,12 @@ String assistantFormId =
 
             currentRoot.replaceWith(replacementRoot);
             window.PortalOpsInitContextPanel(replacementRoot);
+
+            var responseArea = replacementRoot.querySelector('.portalops-context-assistant-response');
+
+            if (responseArea) {
+              responseArea.scrollTop = responseArea.scrollHeight;
+            }
           })
           .catch(function() {
             window.location.href = form.action + '?' + searchParams.toString();
