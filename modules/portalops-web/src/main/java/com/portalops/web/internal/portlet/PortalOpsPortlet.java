@@ -67,6 +67,7 @@ import org.osgi.service.component.annotations.Reference;
         "com.liferay.portlet.display-category=category.hidden",
         "com.liferay.portlet.header-portlet-css=/css/main.css",
         "com.liferay.portlet.instanceable=false",
+        "com.liferay.portlet.system=true",
         "javax.portlet.display-name=PortalOps Dashboard",
         "javax.portlet.init-param.template-path=/",
         "javax.portlet.init-param.view-template=/view.jsp",
