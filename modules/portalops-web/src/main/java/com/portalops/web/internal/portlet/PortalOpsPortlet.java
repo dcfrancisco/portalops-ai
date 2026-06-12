@@ -32,6 +32,7 @@ import com.portalops.api.service.PortalOpsFacade;
 import com.portalops.api.service.PortalOpsRequestContext;
 import com.portalops.web.internal.constants.PortalOpsPortletKeys;
 import com.portalops.web.internal.dashboard.PortalOpsDashboardDataProvider;
+import com.portalops.web.internal.display.PortalOpsAssistantConversationTurn;
 import com.portalops.web.internal.display.PortalOpsDashboardData;
 import com.portalops.web.internal.display.PortalOpsNavigationItem;
 import com.portalops.web.internal.display.PortalOpsSystemHealthData;
@@ -49,6 +50,7 @@ import java.util.Set;
 
 import javax.portlet.Portlet;
 import javax.portlet.PortletException;
+import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
@@ -147,6 +149,10 @@ public class PortalOpsPortlet extends MVCPortlet {
                 ParamUtil.getString(renderRequest, "assistantPrompt"));
         renderRequest.setAttribute(
                 "PORTALOPS_ASSISTANT_RESPONSE", portalOpsAssistantResponse);
+        renderRequest.setAttribute(
+                "PORTALOPS_ASSISTANT_TURNS",
+                _getPortalOpsAssistantConversationTurns(
+                        renderRequest, portalOpsAssistantResponse));
         renderRequest.setAttribute(
                 "PORTALOPS_ANALYSIS_RESPONSE", portalOpsAnalysisResponse);
 
@@ -380,6 +386,50 @@ public class PortalOpsPortlet extends MVCPortlet {
                 _toFindingCards(portalOpsAssistantResponse),
                 _toRecommendations(portalOpsAssistantResponse),
                 _toActionLinks(portalOpsAssistantResponse));
+    }
+
+    private List<PortalOpsAssistantConversationTurn>
+            _getPortalOpsAssistantConversationTurns(
+                    RenderRequest renderRequest,
+                    PortalOpsAssistantResponse<? extends AssistantPayload>
+                            portalOpsAssistantResponse) {
+
+        PortletSession portletSession = renderRequest.getPortletSession();
+        List<PortalOpsAssistantConversationTurn> turns =
+                (List<PortalOpsAssistantConversationTurn>)
+                        portletSession.getAttribute(
+                                _PORTALOPS_ASSISTANT_TURNS,
+                                PortletSession.PORTLET_SCOPE);
+
+        if (turns == null) {
+            turns = new ArrayList<>();
+        }
+
+        String assistantMode = ParamUtil.getString(
+                renderRequest, "assistantMode");
+        String assistantPrompt = ParamUtil.getString(
+                renderRequest, "assistantPrompt");
+
+        if ("prompt".equals(assistantMode) &&
+            (portalOpsAssistantResponse != null) &&
+            !assistantPrompt.isEmpty()) {
+
+            turns = new ArrayList<>(turns);
+
+            turns.add(
+                    new PortalOpsAssistantConversationTurn(
+                            assistantPrompt, portalOpsAssistantResponse));
+
+            while (turns.size() > 8) {
+                turns.remove(0);
+            }
+
+            portletSession.setAttribute(
+                    _PORTALOPS_ASSISTANT_TURNS, turns,
+                    PortletSession.PORTLET_SCOPE);
+        }
+
+        return List.copyOf(turns);
     }
 
     private int _getPortalOpsBundleCount(BundleContext bundleContext) {
@@ -766,6 +816,8 @@ public class PortalOpsPortlet extends MVCPortlet {
 
     private static final Log _log = LogFactoryUtil.getLog(
             PortalOpsPortlet.class);
+    private static final String _PORTALOPS_ASSISTANT_TURNS =
+            "PORTALOPS_ASSISTANT_TURNS";
 
     @Reference
     private PortalOpsFacade _portalOpsFacade;

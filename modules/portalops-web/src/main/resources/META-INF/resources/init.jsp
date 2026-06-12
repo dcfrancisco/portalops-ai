@@ -19,6 +19,7 @@
 <%@ page import="com.portalops.assistant.api.payload.StaleContentPayload" %>
 <%@ page import="com.portalops.assistant.api.payload.SystemHealthPayload" %>
 <%@ page import="com.portalops.web.internal.display.PortalOpsAssistantData" %>
+<%@ page import="com.portalops.web.internal.display.PortalOpsAssistantConversationTurn" %>
 <%@ page import="com.portalops.web.internal.display.PortalOpsAssistantInsight" %>
 <%@ page import="com.portalops.web.internal.display.PortalOpsDashboardCard" %>
 <%@ page import="com.portalops.web.internal.display.PortalOpsDashboardData" %>
@@ -28,6 +29,7 @@
 <%@ page import="com.portalops.web.internal.display.PortalOpsNavigationItem" %>
 <%@ page import="com.portalops.web.internal.display.PortalOpsSystemHealthData" %>
 <%@ page import="com.portalops.web.internal.display.PortalOpsViewData" %>
+<%@ page import="java.util.List" %>
 <%@ taglib uri="http://java.sun.com/portlet_2_0" prefix="portlet" %>
 <%@ taglib uri="http://liferay.com/tld/clay" prefix="clay" %>
 <%@ taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %>
@@ -45,4 +47,7 @@ String assistantPromptValue =
 PortalOpsAnalysisResponse analysisResponse =
     (PortalOpsAnalysisResponse)request.getAttribute(
         "PORTALOPS_ANALYSIS_RESPONSE");
+List<PortalOpsAssistantConversationTurn> assistantTurns =
+    (List<PortalOpsAssistantConversationTurn>)request.getAttribute(
+        "PORTALOPS_ASSISTANT_TURNS");
 %>

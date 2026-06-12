@@ -3,148 +3,22 @@ PortalOpsAssistantInsight assistantInsight = assistantData.getInsight();
 %>
 
 <section class="portalops-assistant-insight">
-  <% if (assistantResponse != null) { %>
-    <% if ((assistantPromptValue != null) && !assistantPromptValue.isEmpty()) { %>
-      <div class="portalops-assistant-prompt-bubble">
-        <span class="portalops-metric-label">Prompt</span>
-        <div class="portalops-assistant-prompt-copy"><%= HtmlUtil.escape(assistantPromptValue) %></div>
-      </div>
+  <% if ((assistantTurns != null) && !assistantTurns.isEmpty()) { %>
+    <% for (PortalOpsAssistantConversationTurn assistantTurn : assistantTurns) {
+         request.setAttribute(
+             "PORTALOPS_ASSISTANT_TURN_PROMPT", assistantTurn.getPrompt());
+         request.setAttribute(
+             "PORTALOPS_ASSISTANT_TURN_RESPONSE",
+             assistantTurn.getPortalOpsAssistantResponse());
+    %>
+      <%@ include file="/components/assistant_turn.jspf" %>
     <% } %>
-
-    <div class="alert alert-<%= (assistantResponse.getStatus() == AssistantStatus.ERROR) ? "danger" : ((assistantResponse.getStatus() == AssistantStatus.WARNING) ? "warning" : "info") %> portalops-assistant-alert" role="alert">
-      <strong><%= HtmlUtil.escape(assistantResponse.getTitle()) %></strong>
-      <span><%= HtmlUtil.escape(assistantResponse.getSummary()) %></span>
-    </div>
-
-    <div class="portalops-assistant-list-block">
-      <div class="portalops-metric-label">Findings</div>
-      <ul class="portalops-list portalops-assistant-list">
-        <% for (String finding : assistantResponse.getFindings()) { %>
-          <li><%= HtmlUtil.escape(finding) %></li>
-        <% } %>
-      </ul>
-    </div>
-
-    <div class="portalops-assistant-list-block">
-      <div class="portalops-metric-label">Recommendations</div>
-      <ul class="portalops-list portalops-assistant-list">
-        <% for (String recommendation : assistantResponse.getRecommendations()) { %>
-          <li><%= HtmlUtil.escape(recommendation) %></li>
-        <% } %>
-      </ul>
-    </div>
-
-    <% if (assistantResponse.getPayload() instanceof SystemHealthPayload) {
-         SystemHealthPayload systemHealthPayload =
-             (SystemHealthPayload)assistantResponse.getPayload();
+  <% } else if (assistantResponse != null) { %>
+    <%
+    request.setAttribute("PORTALOPS_ASSISTANT_TURN_PROMPT", assistantPromptValue);
+    request.setAttribute("PORTALOPS_ASSISTANT_TURN_RESPONSE", assistantResponse);
     %>
-      <div class="portalops-assistant-list-block">
-        <div class="portalops-metric-label">Payload</div>
-        <div class="portalops-grid portalops-grid-assistant-metrics">
-          <div class="portalops-dashboard-card card">
-            <div class="card-body">
-              <div class="portalops-metric-label">Cluster Nodes</div>
-              <div class="portalops-metric-value"><%= systemHealthPayload.getActiveClusterNodes() %> / <%= systemHealthPayload.getTotalClusterNodes() %></div>
-            </div>
-          </div>
-          <div class="portalops-dashboard-card card">
-            <div class="card-body">
-              <div class="portalops-metric-label">Failed Jobs</div>
-              <div class="portalops-metric-value"><%= systemHealthPayload.getFailedScheduledJobs() %></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    <% } else if (assistantResponse.getPayload() instanceof StaleContentPayload) {
-         StaleContentPayload staleContentPayload =
-             (StaleContentPayload)assistantResponse.getPayload();
-    %>
-      <div class="portalops-assistant-list-block">
-        <div class="portalops-metric-label">Payload</div>
-        <div class="table-responsive">
-          <table class="table table-sm">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Type</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% for (StaleContentItem staleContentItem : staleContentPayload.getStaleContentItems()) { %>
-                <tr>
-                  <td><%= HtmlUtil.escape(staleContentItem.getTitle()) %></td>
-                  <td><%= HtmlUtil.escape(staleContentItem.getType()) %></td>
-                  <td><%= HtmlUtil.escape(staleContentItem.getStatus()) %></td>
-                </tr>
-              <% } %>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    <% } else if (assistantResponse.getPayload() instanceof SearchHealthPayload) {
-         SearchHealthPayload searchHealthPayload =
-             (SearchHealthPayload)assistantResponse.getPayload();
-    %>
-      <div class="portalops-assistant-list-block">
-        <div class="portalops-metric-label">Payload</div>
-        <ul class="portalops-list portalops-assistant-list">
-          <li>Indexed documents: <%= searchHealthPayload.getIndexedDocuments() %></li>
-          <li>Failed indexes: <%= searchHealthPayload.getFailedIndexes() %></li>
-          <li>Last reindex: <%= HtmlUtil.escape(searchHealthPayload.getLastReindex()) %></li>
-          <% for (SearchIssue searchIssue : searchHealthPayload.getSearchIssues()) { %>
-            <li><%= HtmlUtil.escape(searchIssue.getTitle()) %> (<%= HtmlUtil.escape(searchIssue.getSeverity()) %>)</li>
-          <% } %>
-        </ul>
-      </div>
-    <% } else if (assistantResponse.getPayload() instanceof PermissionRiskPayload) {
-         PermissionRiskPayload permissionRiskPayload =
-             (PermissionRiskPayload)assistantResponse.getPayload();
-    %>
-      <div class="portalops-assistant-list-block">
-        <div class="portalops-metric-label">Payload</div>
-        <ul class="portalops-list portalops-assistant-list">
-          <% for (PermissionRiskItem permissionRiskItem : permissionRiskPayload.getPermissionRiskItems()) { %>
-            <li><%= HtmlUtil.escape(permissionRiskItem.getPrincipalName()) %>: <%= HtmlUtil.escape(permissionRiskItem.getActionKey()) %> on <%= HtmlUtil.escape(permissionRiskItem.getResourceName()) %> [<%= HtmlUtil.escape(permissionRiskItem.getRiskLevel()) %>]</li>
-          <% } %>
-        </ul>
-      </div>
-    <% } else if (assistantResponse.getPayload() instanceof RecentChangesPayload) {
-         RecentChangesPayload recentChangesPayload =
-             (RecentChangesPayload)assistantResponse.getPayload();
-    %>
-      <div class="portalops-assistant-list-block">
-        <div class="portalops-metric-label">Payload</div>
-        <ul class="portalops-list portalops-assistant-list">
-          <% for (RecentChangeItem recentChangeItem : recentChangesPayload.getRecentChangeItems()) { %>
-            <li><%= HtmlUtil.escape(recentChangeItem.getCategory()) %>: <%= HtmlUtil.escape(recentChangeItem.getDescription()) %> (<%= HtmlUtil.escape(recentChangeItem.getHappenedAt()) %>)</li>
-          <% } %>
-        </ul>
-      </div>
-    <% } else if (assistantResponse.getPayload() instanceof FailedWorkflowPayload) {
-         FailedWorkflowPayload failedWorkflowPayload =
-             (FailedWorkflowPayload)assistantResponse.getPayload();
-    %>
-      <div class="portalops-assistant-list-block">
-        <div class="portalops-metric-label">Payload</div>
-        <ul class="portalops-list portalops-assistant-list">
-          <% for (FailedWorkflowItem failedWorkflowItem : failedWorkflowPayload.getFailedWorkflowItems()) { %>
-            <li><%= HtmlUtil.escape(failedWorkflowItem.getAssetTitle()) %> - <%= HtmlUtil.escape(failedWorkflowItem.getWorkflowDefinition()) %> [<%= HtmlUtil.escape(failedWorkflowItem.getStatus()) %>]</li>
-          <% } %>
-        </ul>
-      </div>
-    <% } %>
-
-    <% if (!assistantResponse.getActions().isEmpty()) { %>
-      <div class="portalops-assistant-list-block">
-        <div class="portalops-metric-label">Actions</div>
-        <div class="portalops-assistant-action-list">
-          <% for (AssistantAction assistantAction : assistantResponse.getActions()) { %>
-            <span class="btn btn-secondary btn-sm disabled"><%= HtmlUtil.escape(assistantAction.getLabel()) %></span>
-          <% } %>
-        </div>
-      </div>
-    <% } %>
+    <%@ include file="/components/assistant_turn.jspf" %>
   <% } else { %>
     <div class="portalops-assistant-status">
       <span class="portalops-metric-label"><%= HtmlUtil.escape(assistantInsight.getTitle()) %></span>

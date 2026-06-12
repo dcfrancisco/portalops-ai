@@ -4,6 +4,8 @@ String assistantInputId =
     renderResponse.getNamespace() + "portalOpsAssistantPrompt";
 String contextTabsId =
     renderResponse.getNamespace() + "portalOpsContextTabs";
+String assistantFormId =
+    renderResponse.getNamespace() + "portalOpsAssistantForm";
 %>
 
 <div class="portalops-context-shell">
@@ -52,7 +54,7 @@ String contextTabsId =
           </portlet:renderURL>
 
           <div class="portalops-assistant-prompt portalops-context-assistant-composer">
-            <form action="<%= portalOpsAssistantURL %>" method="get">
+            <form action="<%= portalOpsAssistantURL %>" id="<%= HtmlUtil.escapeAttribute(assistantFormId) %>" method="get">
               <input name="<portlet:namespace />assistantMode" type="hidden" value="prompt" />
               <input name="<portlet:namespace />screen" type="hidden" value="<%= HtmlUtil.escapeAttribute(viewData.getActiveScreen()) %>" />
 
@@ -79,30 +81,16 @@ String contextTabsId =
           <p class="portalops-section-subtitle">A quick scan of current operational signals.</p>
 
           <div class="portalops-context-list">
-            <% if (analysisResponse != null) { %>
-              <% for (FindingCard findingCard : analysisResponse.getFindingCards()) { %>
-                <div class="portalops-context-list-item">
-                  <span class="portalops-status-badge portalops-status-badge-<%= HtmlUtil.escapeAttribute(findingCard.getStatus()) %>">
-                    <%= HtmlUtil.escape(findingCard.getValue()) %>
-                  </span>
-                  <div>
-                    <div class="portalops-insight-title"><%= HtmlUtil.escape(findingCard.getTitle()) %></div>
-                    <div class="portalops-metric-help"><%= HtmlUtil.escape(findingCard.getSummary()) %></div>
-                  </div>
+            <% for (PortalOpsDashboardInsight insight : dashboardData.getInsights()) { %>
+              <div class="portalops-context-list-item">
+                <span class="portalops-status-badge portalops-status-badge-<%= HtmlUtil.escapeAttribute(insight.getSeverity()) %>">
+                  <%= HtmlUtil.escape(insight.getSeverity()) %>
+                </span>
+                <div>
+                  <div class="portalops-insight-title"><%= HtmlUtil.escape(insight.getTitle()) %></div>
+                  <div class="portalops-metric-help"><%= HtmlUtil.escape(insight.getDescription()) %></div>
                 </div>
-              <% } %>
-            <% } else { %>
-              <% for (PortalOpsDashboardInsight insight : dashboardData.getInsights()) { %>
-                <div class="portalops-context-list-item">
-                  <span class="portalops-status-badge portalops-status-badge-<%= HtmlUtil.escapeAttribute(insight.getSeverity()) %>">
-                    <%= HtmlUtil.escape(insight.getSeverity()) %>
-                  </span>
-                  <div>
-                    <div class="portalops-insight-title"><%= HtmlUtil.escape(insight.getTitle()) %></div>
-                    <div class="portalops-metric-help"><%= HtmlUtil.escape(insight.getDescription()) %></div>
-                  </div>
-                </div>
-              <% } %>
+              </div>
             <% } %>
           </div>
         </section>
@@ -145,34 +133,118 @@ String contextTabsId =
 
 <script>
   (function() {
-    var promptInput = document.getElementById('<%= HtmlUtil.escapeJS(assistantInputId) %>');
-    var tabsRoot = document.getElementById('<%= HtmlUtil.escapeJS(contextTabsId) %>');
+    var cardId = '<%= HtmlUtil.escapeJS(contextTabsId) %>';
+    var formId = '<%= HtmlUtil.escapeJS(assistantFormId) %>';
+    var promptId = '<%= HtmlUtil.escapeJS(assistantInputId) %>';
 
-    if (tabsRoot) {
-      var tabs = tabsRoot.querySelectorAll('[data-tab-target]');
-      var panels = tabsRoot.querySelectorAll('[data-tab-panel]');
+    window.PortalOpsInitContextPanel = function(root) {
+      if (!root) {
+        return;
+      }
 
-      tabs.forEach(function(tab) {
-        tab.addEventListener('click', function() {
-          var target = tab.getAttribute('data-tab-target');
+      var tabsRoot = root.querySelector('#' + CSS.escape(cardId));
+      var form = root.querySelector('#' + CSS.escape(formId));
+      var promptInput = root.querySelector('#' + CSS.escape(promptId));
 
-          tabs.forEach(function(item) {
-            var active = item === tab;
-            item.classList.toggle('is-active', active);
-            item.setAttribute('aria-selected', String(active));
-          });
+      if (tabsRoot) {
+        var tabs = tabsRoot.querySelectorAll('[data-tab-target]');
+        var panels = tabsRoot.querySelectorAll('[data-tab-panel]');
 
-          panels.forEach(function(panel) {
-            var active = panel.getAttribute('data-tab-panel') === target;
-            panel.classList.toggle('is-active', active);
-            panel.hidden = !active;
+        tabs.forEach(function(tab) {
+          if (tab.dataset.bound === 'true') {
+            return;
+          }
+
+          tab.dataset.bound = 'true';
+
+          tab.addEventListener('click', function() {
+            var target = tab.getAttribute('data-tab-target');
+
+            tabs.forEach(function(item) {
+              var active = item === tab;
+              item.classList.toggle('is-active', active);
+              item.setAttribute('aria-selected', String(active));
+            });
+
+            panels.forEach(function(panel) {
+              var active = panel.getAttribute('data-tab-panel') === target;
+              panel.classList.toggle('is-active', active);
+              panel.hidden = !active;
+            });
           });
         });
-      });
-    }
+      }
 
-    if (!promptInput) {
-      return;
+      if (!form || !promptInput || (form.dataset.bound === 'true')) {
+        return;
+      }
+
+      form.dataset.bound = 'true';
+
+      form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        var submitButton = form.querySelector('button[type="submit"]');
+        var formData = new FormData(form);
+        var searchParams = new URLSearchParams();
+
+        formData.forEach(function(value, key) {
+          searchParams.append(key, value);
+        });
+
+        if (submitButton) {
+          submitButton.disabled = true;
+        }
+
+        fetch(form.action + '?' + searchParams.toString(), {
+          credentials: 'same-origin',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          method: 'GET'
+        })
+          .then(function(response) {
+            return response.text();
+          })
+          .then(function(html) {
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(html, 'text/html');
+            var currentCard = root.querySelector('#' + CSS.escape(cardId));
+            var replacementCard = doc.getElementById(cardId);
+
+            if (!currentCard || !replacementCard) {
+              window.location.href = form.action + '?' + searchParams.toString();
+              return;
+            }
+
+            var currentRoot = currentCard.closest('.portalops-context-shell');
+            var replacementRoot = replacementCard.closest('.portalops-context-shell');
+
+            if (!currentRoot || !replacementRoot) {
+              window.location.href = form.action + '?' + searchParams.toString();
+              return;
+            }
+
+            currentRoot.replaceWith(replacementRoot);
+            window.PortalOpsInitContextPanel(replacementRoot);
+          })
+          .catch(function() {
+            window.location.href = form.action + '?' + searchParams.toString();
+          })
+          .finally(function() {
+            if (submitButton) {
+              submitButton.disabled = false;
+            }
+          });
+      });
+    };
+
+    var initialCard = document.getElementById(cardId);
+
+    if (initialCard) {
+      window.PortalOpsInitContextPanel(
+        initialCard.closest('.portalops-context-shell')
+      );
     }
   })();
 </script>
