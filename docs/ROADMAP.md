@@ -1,200 +1,123 @@
-Yes—with one refinement.
+# PortalOps Roadmap
 
-For **your MVP**, I’d sequence it as:
+This roadmap reflects the current AI-native direction of PortalOps.
 
-# Recommended order
+The platform is evolving through layered capabilities rather than a single one-time implementation.
 
-## Phase 0 — Core platform skeleton
-
-First.
-
-Not AI yet.
-
-Because you need the spine.
-
-Build:
-
-* `portalops-api`
-* `portalops-command`
-* `portalops-policy`
-* `portalops-audit`
-* `portalops-service`
-* `portalops-web`
-
-Plus maybe empty:
-
-* `portalops-knowledge`
-* `portalops-llm-spi`
+## Phase 1: OpenAI Provider
 
 Goal:
-working deployable Liferay app shell.
 
----
+- Integrate a real AI provider into the PortalOps assistant flow
 
-## Phase 1 — AI backend (inside Liferay modules)
+Focus areas:
 
-This is what you mean by AI backend.
+- OpenAI provider implementation
+- Prompt-to-analysis execution
+- Structured response generation
+- Assistant-driven response rendering
 
-Yes.
+Expected outcome:
 
-But clarify:
-**OSGi AI backend**, not separate Spring Boot backend.
+- PortalOps can submit a real assistant prompt to OpenAI and render the resulting structured response in the PortalOps experience
 
-Start with:
+## Phase 2: Knowledge Layer
 
-```text
-portalops-llm-spi
-portalops-knowledge
-```
+Goal:
 
-Capabilities:
+- Establish the retrieval foundation for portal-aware analysis
 
-* provider abstraction
-* prompt orchestration
-* AI summarization service
-* structured portal context input
+Focus areas:
 
-Example:
-workflow data → AI explanation
+- PostgreSQL
+- `pgvector`
+- Embeddings
+- Document ingestion
 
-This proves AI integration.
+Expected outcome:
 
----
+- PortalOps can ingest portal-specific knowledge and retrieve relevant context for investigations
 
-## Phase 2 — AI UI
+## Phase 3: Liferay Tools
 
-Yes.
+Goal:
 
-Add thin UI.
+- Connect PortalOps to real Liferay operational capabilities
 
-Simple:
+Focus areas:
 
-* command console
-* results panel
-* maybe history panel
+- User APIs
+- Role APIs
+- Organization APIs
+- Workflow APIs
+- Search APIs
+- Content APIs
 
-No fancy dashboards yet.
+Expected outcome:
 
-Examples:
+- PortalOps investigations can gather real evidence from Liferay instead of relying on mock or static inputs
 
-```text
-/show workflows pending
-/show stale content
-```
+## Phase 4: Skills
 
-This gives visible demo value.
+Goal:
 
----
+- Introduce the orchestration layer between intent and tools
 
-## Phase 3 — First capabilities
+Focus areas:
 
-Now connect real Liferay data.
+- User Management Skill
+- Role Governance Skill
+- Content Governance Skill
+- Workflow Analysis Skill
+- Search Analysis Skill
+- Audit Skill
+- System Health Skill
 
-Build:
+Expected outcome:
 
-### workflow
+- PortalOps can resolve intent into skill execution paths that coordinate tools and produce structured outcomes
 
-```text
-portalops-workflow
-```
+## Phase 5: Governance
 
-### permissions
+Goal:
 
-```text
-portalops-permissions
-```
+- Make governance a first-class control layer over recommendations and actions
 
-### content
+Focus areas:
 
-```text
-portalops-content
-```
+- Security policies
+- Governance rules
+- Portal standards
+- Organizational policies
 
-And maybe:
+Expected outcome:
 
-```text
-portalops-site
-```
+- PortalOps recommendations and actions are evaluated against authoritative governance constraints
 
-Now the product becomes real.
+## Phase 6: Workspace Rendering
 
----
+Goal:
 
-## Phase 4 — knowledge enrichment
+- Mature the rendering engine for structured operational outcomes
 
-Once capability modules exist.
+Focus areas:
 
-`portalops-knowledge` starts aggregating:
+- Cards
+- Tables
+- Trees
+- Forms
+- Charts
+- Findings
+- Actions
 
-* site metadata
-* content metadata
-* workflows
-* permissions
-* health indicators
+Expected outcome:
 
-This creates actual portal awareness.
+- PortalOps can render AI-assisted structured outcomes into reusable operational workspaces rather than relying on text-only responses
 
----
+## Long-Term Model
 
-## Phase 5 — smarter AI reasoning
-
-Now AI can answer:
-
-> Which sites look unhealthy?
-
-instead of just:
-
-> list workflows
-
----
-
-# Slightly different from your wording
-
-You said:
-
-> AI backend → AI UI → capabilities
-
-I’d tweak to:
-
-**core skeleton → AI backend → AI UI → capabilities → knowledge enrichment**
-
-Because without core modules first, AI code gets messy fast.
-
----
-
-# Weekend realistic MVP
-
-If you’re doing this next weekend:
-
-Realistic:
-
-✅ core skeleton
-✅ LLM abstraction
-✅ one provider (OpenAI maybe)
-✅ simple command UI
-✅ one capability (workflow OR content)
-✅ AI summary output
-
-Not all capabilities.
-
----
-
-# Simplest demo
-
-User:
+PortalOps continues to follow this architecture:
 
 ```text
-/show workflows pending
+Intent -> Investigation -> Findings -> Workspace -> Actions
 ```
-
-System:
-
-* queries Liferay workflow services
-* builds structured DTO
-* AI summarizes:
-
-> 12 pending approvals. 4 older than 7 days. Finance workflow appears bottlenecked.
-
-That’s a strong MVP.
-
-So yes—**conceptually your direction is right, just insert core skeleton first.**
