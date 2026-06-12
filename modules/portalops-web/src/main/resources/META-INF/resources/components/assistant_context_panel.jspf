@@ -1,0 +1,147 @@
+<%
+PortalOpsAssistantData assistantData = dashboardData.getAssistantData();
+String assistantInputId =
+    renderResponse.getNamespace() + "portalOpsAssistantPrompt";
+String assistantCommandInputId =
+    renderResponse.getNamespace() + "portalOpsAssistantCommand";
+%>
+
+<div class="portalops-context-shell">
+  <section class="card portalops-context-card">
+    <div class="card-body">
+      <div class="portalops-section-title">Assistant Context</div>
+      <p class="portalops-section-subtitle">
+        Launch investigations from here. Results open in the center workspace.
+      </p>
+
+      <portlet:renderURL var="portalOpsAssistantURL">
+        <portlet:param name="screen" value="assistant" />
+      </portlet:renderURL>
+
+      <div class="portalops-assistant-prompt">
+        <label class="portalops-metric-label" for="<%= HtmlUtil.escapeAttribute(assistantInputId) %>">
+          Investigation Prompt
+        </label>
+
+        <form action="<%= portalOpsAssistantURL %>" method="get">
+          <input id="<%= HtmlUtil.escapeAttribute(assistantCommandInputId) %>" name="<portlet:namespace />assistantCommand" type="hidden" />
+          <input name="<portlet:namespace />screen" type="hidden" value="assistant" />
+
+          <div class="portalops-assistant-prompt-row">
+            <input
+              class="form-control"
+              id="<%= HtmlUtil.escapeAttribute(assistantInputId) %>"
+              name="<portlet:namespace />assistantPrompt"
+              placeholder="<%= HtmlUtil.escapeAttribute(assistantData.getPlaceholder()) %>"
+              type="text"
+              value="<%= HtmlUtil.escapeAttribute(assistantPromptValue == null ? "" : assistantPromptValue) %>"
+            />
+
+            <button class="btn btn-primary" type="submit">
+              Analyze
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <%@ include file="/components/suggested_prompt_list.jspf" %>
+    </div>
+  </section>
+
+  <section class="card portalops-context-card">
+    <div class="card-body">
+      <div class="portalops-section-title">Recent Findings</div>
+      <p class="portalops-section-subtitle">A quick scan of current operational signals.</p>
+
+      <div class="portalops-context-list">
+        <% if (analysisResponse != null) { %>
+          <% for (FindingCard findingCard : analysisResponse.getFindingCards()) { %>
+            <div class="portalops-context-list-item">
+              <span class="portalops-status-badge portalops-status-badge-<%= HtmlUtil.escapeAttribute(findingCard.getStatus()) %>">
+                <%= HtmlUtil.escape(findingCard.getValue()) %>
+              </span>
+              <div>
+                <div class="portalops-insight-title"><%= HtmlUtil.escape(findingCard.getTitle()) %></div>
+                <div class="portalops-metric-help"><%= HtmlUtil.escape(findingCard.getSummary()) %></div>
+              </div>
+            </div>
+          <% } %>
+        <% } else { %>
+          <% for (PortalOpsDashboardInsight insight : dashboardData.getInsights()) { %>
+            <div class="portalops-context-list-item">
+              <span class="portalops-status-badge portalops-status-badge-<%= HtmlUtil.escapeAttribute(insight.getSeverity()) %>">
+                <%= HtmlUtil.escape(insight.getSeverity()) %>
+              </span>
+              <div>
+                <div class="portalops-insight-title"><%= HtmlUtil.escape(insight.getTitle()) %></div>
+                <div class="portalops-metric-help"><%= HtmlUtil.escape(insight.getDescription()) %></div>
+              </div>
+            </div>
+          <% } %>
+        <% } %>
+      </div>
+    </div>
+  </section>
+
+  <section class="card portalops-context-card">
+    <div class="card-body">
+      <div class="portalops-section-title">Recommended Actions</div>
+      <p class="portalops-section-subtitle">Use actions to move into operational workflows.</p>
+
+      <div class="portalops-context-actions">
+        <% if ((analysisResponse != null) && !analysisResponse.getActionLinks().isEmpty()) { %>
+          <% for (ActionLink actionLink : analysisResponse.getActionLinks()) {
+               request.setAttribute("PORTALOPS_ACTION_LINK", actionLink);
+          %>
+            <%@ include file="/components/action_card.jspf" %>
+          <% } %>
+        <% } else { %>
+          <% for (PortalOpsDashboardQuickAction quickAction : dashboardData.getQuickActions()) {
+               javax.portlet.PortletURL quickActionURL = renderResponse.createRenderURL();
+               quickActionURL.setParameter("screen", quickAction.getScreen());
+               String quickActionHref = quickActionURL.toString();
+
+               if (!quickAction.getAnchor().isEmpty()) {
+                   quickActionHref = quickActionHref + "#" + quickAction.getAnchor();
+               }
+          %>
+            <a class="portalops-action-card card" href="<%= HtmlUtil.escapeAttribute(quickActionHref) %>">
+              <div class="card-body">
+                <div class="portalops-metric-label">Action</div>
+                <div class="portalops-insight-title"><%= HtmlUtil.escape(quickAction.getLabel()) %></div>
+                <div class="portalops-metric-help">Jump directly into the related PortalOps module.</div>
+              </div>
+            </a>
+          <% } %>
+        <% } %>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  (function() {
+    var promptInput = document.getElementById('<%= HtmlUtil.escapeJS(assistantInputId) %>');
+    var commandInput = document.getElementById('<%= HtmlUtil.escapeJS(assistantCommandInputId) %>');
+
+    if (!promptInput || !commandInput) {
+      return;
+    }
+
+    var promptButtons = document.querySelectorAll(
+      '[data-portalops-assistant-prompt="<%= HtmlUtil.escapeJS(renderResponse.getNamespace()) %>"]'
+    );
+
+    promptInput.addEventListener('input', function() {
+      commandInput.value = '';
+    });
+
+    promptButtons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        promptInput.value = button.getAttribute('data-prompt') || '';
+        commandInput.value = button.getAttribute('data-command') || '';
+        promptInput.focus();
+      });
+    });
+  })();
+</script>

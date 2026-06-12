@@ -8,11 +8,22 @@ import com.liferay.portal.kernel.util.ReleaseInfo;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 
+import com.portalops.ai.api.ActionLink;
+import com.portalops.ai.api.FindingCard;
+import com.portalops.ai.api.PortalOpsAnalysisResponse;
+import com.portalops.ai.api.Recommendation;
 import com.portalops.assistant.api.AssistantCommand;
+import com.portalops.assistant.api.AssistantStatus;
 import com.portalops.assistant.api.AssistantCommandRouter;
 import com.portalops.assistant.api.PortalOpsAssistantRequest;
 import com.portalops.assistant.api.PortalOpsAssistantResponse;
 import com.portalops.assistant.api.payload.AssistantPayload;
+import com.portalops.assistant.api.payload.FailedWorkflowPayload;
+import com.portalops.assistant.api.payload.PermissionRiskPayload;
+import com.portalops.assistant.api.payload.RecentChangesPayload;
+import com.portalops.assistant.api.payload.SearchHealthPayload;
+import com.portalops.assistant.api.payload.StaleContentPayload;
+import com.portalops.assistant.api.payload.SystemHealthPayload;
 import com.portalops.api.audit.AuditRecorder;
 import com.portalops.api.knowledge.PortalKnowledgeSnapshot;
 import com.portalops.api.policy.CommandAuthorizer;
@@ -88,6 +99,8 @@ public class PortalOpsPortlet extends MVCPortlet {
         PortalOpsAssistantResponse<? extends AssistantPayload>
                 portalOpsAssistantResponse = _getPortalOpsAssistantResponse(
                         renderRequest, portalOpsRequestContext);
+        PortalOpsAnalysisResponse portalOpsAnalysisResponse =
+                _getPortalOpsAnalysisResponse(portalOpsAssistantResponse);
 
         BundleContext bundleContext = FrameworkUtil.getBundle(
                 PortalOpsPortlet.class
@@ -132,6 +145,8 @@ public class PortalOpsPortlet extends MVCPortlet {
                 ParamUtil.getString(renderRequest, "assistantPrompt"));
         renderRequest.setAttribute(
                 "PORTALOPS_ASSISTANT_RESPONSE", portalOpsAssistantResponse);
+        renderRequest.setAttribute(
+                "PORTALOPS_ANALYSIS_RESPONSE", portalOpsAnalysisResponse);
 
         renderResponse.setTitle(portalOpsViewData.getPageTitle());
 
@@ -236,6 +251,8 @@ public class PortalOpsPortlet extends MVCPortlet {
         switch (activeScreen) {
             case "knowledge":
                 return "PortalOps Knowledge";
+            case "assistant":
+                return "PortalOps Assistant";
             case "policy":
                 return "PortalOps Policy";
             case "content":
@@ -259,6 +276,10 @@ public class PortalOpsPortlet extends MVCPortlet {
             return portalOpsDashboardData.getSummary();
         }
 
+        if ("assistant".equals(activeScreen)) {
+            return "Use PortalOps Assistant to analyze operational findings, review risks, and navigate into the right module.";
+        }
+
         if ("settings".equals(activeScreen)) {
             return "Developer-centric runtime diagnostics are available here " +
                     "so the main dashboard can stay focused on operations.";
@@ -274,6 +295,10 @@ public class PortalOpsPortlet extends MVCPortlet {
 
         if ("settings".equals(activeScreen)) {
             return portalOpsSystemHealthData.getBundleStatus();
+        }
+
+        if ("assistant".equals(activeScreen)) {
+            return "Operational Analysis";
         }
 
         return portalOpsDashboardData.getHeadline();
@@ -293,6 +318,10 @@ public class PortalOpsPortlet extends MVCPortlet {
             if ("warning".equals(headline)) {
                 return "warning";
             }
+        }
+
+        if ("assistant".equals(activeScreen)) {
+            return "warning";
         }
 
         return "success";
@@ -318,6 +347,21 @@ public class PortalOpsPortlet extends MVCPortlet {
                                 ParamUtil.getString(
                                         renderRequest, "assistantPrompt")),
                         portalOpsRequestContext));
+    }
+
+    private PortalOpsAnalysisResponse _getPortalOpsAnalysisResponse(
+            PortalOpsAssistantResponse<? extends AssistantPayload>
+                    portalOpsAssistantResponse) {
+
+        if (portalOpsAssistantResponse == null) {
+            return null;
+        }
+
+        return new PortalOpsAnalysisResponse(
+                portalOpsAssistantResponse.getSummary(),
+                _toFindingCards(portalOpsAssistantResponse),
+                _toRecommendations(portalOpsAssistantResponse),
+                _toActionLinks(portalOpsAssistantResponse));
     }
 
     private int _getPortalOpsBundleCount(BundleContext bundleContext) {
@@ -390,6 +434,206 @@ public class PortalOpsPortlet extends MVCPortlet {
                 return AssistantCommand.SHOW_FAILED_WORKFLOWS;
             default:
                 return null;
+        }
+    }
+
+    private List<ActionLink> _toActionLinks(
+            PortalOpsAssistantResponse<? extends AssistantPayload>
+                    portalOpsAssistantResponse) {
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                StaleContentPayload) {
+
+            return List.of(
+                    new ActionLink(
+                            "Review Stale Content", "content", ""));
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                PermissionRiskPayload) {
+
+            return List.of(
+                    new ActionLink(
+                            "Open Permission Risks", "audit", ""));
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                SearchHealthPayload) {
+
+            return List.of(
+                    new ActionLink(
+                            "Open Search Health", "assistant", ""));
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                FailedWorkflowPayload) {
+
+            return List.of(
+                    new ActionLink(
+                            "Open Workflow Review", "workflow", ""));
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                RecentChangesPayload) {
+
+            return List.of(
+                    new ActionLink(
+                            "Show Recent Changes", "audit", ""));
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                SystemHealthPayload) {
+
+            return List.of(
+                    new ActionLink(
+                            "Open System Health", "settings", ""));
+        }
+
+        return List.of();
+    }
+
+    private List<FindingCard> _toFindingCards(
+            PortalOpsAssistantResponse<? extends AssistantPayload>
+                    portalOpsAssistantResponse) {
+
+        String status = _toFindingStatus(portalOpsAssistantResponse.getStatus());
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                SystemHealthPayload) {
+
+            SystemHealthPayload systemHealthPayload =
+                    (SystemHealthPayload)portalOpsAssistantResponse.getPayload();
+
+            return List.of(
+                    new FindingCard(
+                            "Search Health",
+                            systemHealthPayload.isSearchOperational() ?
+                                    "Operational" : "Needs Review",
+                            status,
+                            "Search health is a primary operational signal."),
+                    new FindingCard(
+                            "Failed Jobs",
+                            String.valueOf(
+                                    systemHealthPayload.getFailedScheduledJobs()),
+                            status,
+                            "Failed or stuck jobs need intervention before they cascade."));
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                StaleContentPayload) {
+
+            StaleContentPayload staleContentPayload =
+                    (StaleContentPayload)portalOpsAssistantResponse.getPayload();
+
+            return List.of(
+                    new FindingCard(
+                            "Stale Content",
+                            String.valueOf(
+                                    staleContentPayload.getStaleContentItems().size()),
+                            status,
+                            "Stale content weakens trust and content governance."));
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                SearchHealthPayload) {
+
+            SearchHealthPayload searchHealthPayload =
+                    (SearchHealthPayload)portalOpsAssistantResponse.getPayload();
+
+            return List.of(
+                    new FindingCard(
+                            "Search Failures",
+                            String.valueOf(
+                                    searchHealthPayload.getFailedIndexes()),
+                            status,
+                            "Search failures directly affect discovery quality."),
+                    new FindingCard(
+                            "Indexed Documents",
+                            String.valueOf(
+                                    searchHealthPayload.getIndexedDocuments()),
+                            "info",
+                            "Indexed document coverage helps explain discovery reach."));
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                PermissionRiskPayload) {
+
+            PermissionRiskPayload permissionRiskPayload =
+                    (PermissionRiskPayload)portalOpsAssistantResponse.getPayload();
+
+            return List.of(
+                    new FindingCard(
+                            "Permission Risks",
+                            String.valueOf(
+                                    permissionRiskPayload.getPermissionRiskItems().size()),
+                            status,
+                            "Elevated permissions should be reviewed against operational policy."));
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                FailedWorkflowPayload) {
+
+            FailedWorkflowPayload failedWorkflowPayload =
+                    (FailedWorkflowPayload)portalOpsAssistantResponse.getPayload();
+
+            return List.of(
+                    new FindingCard(
+                            "Failed Workflows",
+                            String.valueOf(
+                                    failedWorkflowPayload.getFailedWorkflowItems().size()),
+                            status,
+                            "Workflow failures block approvals and operational throughput."));
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                RecentChangesPayload) {
+
+            RecentChangesPayload recentChangesPayload =
+                    (RecentChangesPayload)portalOpsAssistantResponse.getPayload();
+
+            return List.of(
+                    new FindingCard(
+                            "Recent Changes",
+                            String.valueOf(
+                                    recentChangesPayload.getRecentChangeItems().size()),
+                            "info",
+                            "Recent changes can explain newly observed incidents."));
+        }
+
+        return List.of(
+                new FindingCard(
+                        portalOpsAssistantResponse.getTitle(), "1", status,
+                        portalOpsAssistantResponse.getSummary()));
+    }
+
+    private List<Recommendation> _toRecommendations(
+            PortalOpsAssistantResponse<? extends AssistantPayload>
+                    portalOpsAssistantResponse) {
+
+        List<Recommendation> recommendations = new ArrayList<>();
+
+        for (String recommendation :
+                portalOpsAssistantResponse.getRecommendations()) {
+
+            recommendations.add(
+                    new Recommendation(
+                            recommendation, recommendation));
+        }
+
+        return recommendations;
+    }
+
+    private String _toFindingStatus(AssistantStatus assistantStatus) {
+        switch (assistantStatus) {
+            case ERROR:
+                return "critical";
+            case WARNING:
+                return "warning";
+            case INFO:
+                return "info";
+            case SUCCESS:
+            default:
+                return "success";
         }
     }
 

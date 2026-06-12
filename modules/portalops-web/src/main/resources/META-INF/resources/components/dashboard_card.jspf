@@ -7,7 +7,12 @@ com.portalops.web.internal.display.PortalOpsDashboardCard dashboardCard =
 <div class="portalops-dashboard-card card">
   <div class="card-body">
     <div class="portalops-dashboard-card-header">
-      <div class="portalops-metric-label"><%= HtmlUtil.escape(dashboardCard.getTitle()) %></div>
+      <div>
+        <div class="portalops-metric-label"><%= HtmlUtil.escape(dashboardCard.getTitle()) %></div>
+        <span class="label portalops-data-source-badge portalops-data-source-badge-<%= HtmlUtil.escapeAttribute(dashboardCard.getDataSourceType().name().toLowerCase()) %>">
+          <%= HtmlUtil.escape(dashboardCard.getDataSourceType().name()) %>
+        </span>
+      </div>
       <span class="portalops-status-badge portalops-status-badge-<%= HtmlUtil.escapeAttribute(dashboardCard.getStatus()) %>">
         <%= HtmlUtil.escape(dashboardCard.getContext()) %>
       </span>

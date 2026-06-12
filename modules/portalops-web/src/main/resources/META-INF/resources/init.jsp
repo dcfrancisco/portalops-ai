@@ -1,4 +1,8 @@
 <%@ page import="com.liferay.portal.kernel.util.HtmlUtil" %>
+<%@ page import="com.portalops.ai.api.ActionLink" %>
+<%@ page import="com.portalops.ai.api.FindingCard" %>
+<%@ page import="com.portalops.ai.api.PortalOpsAnalysisResponse" %>
+<%@ page import="com.portalops.ai.api.Recommendation" %>
 <%@ page import="com.portalops.assistant.api.AssistantAction" %>
 <%@ page import="com.portalops.assistant.api.AssistantStatus" %>
 <%@ page import="com.portalops.assistant.api.PortalOpsAssistantResponse" %>
@@ -38,4 +42,7 @@ PortalOpsAssistantResponse<? extends AssistantPayload> assistantResponse =
         "PORTALOPS_ASSISTANT_RESPONSE");
 String assistantPromptValue =
     (String)request.getAttribute("PORTALOPS_ASSISTANT_PROMPT");
+PortalOpsAnalysisResponse analysisResponse =
+    (PortalOpsAnalysisResponse)request.getAttribute(
+        "PORTALOPS_ANALYSIS_RESPONSE");
 %>

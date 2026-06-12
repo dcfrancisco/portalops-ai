@@ -1,89 +1,181 @@
-# PortalOps AI
+# PortalOps
 
-AI-powered operations assistant for enterprise portals.
+An Operational Intelligence Platform for Liferay.
 
-PortalOps AI helps engineering, support, and platform teams inspect, troubleshoot, and operate enterprise portal platforms through platform-aware workflows, structured portal knowledge, and guided operational tooling.
+PortalOps provides operational intelligence, governance visibility, audit awareness, workflow insights, knowledge management, and AI-assisted analysis for Liferay environments.
 
-This repository is currently Liferay-first and built as a native Liferay 7.4 modular workspace. The long-term product direction is extensibility to other digital experience platforms such as AEM, WordPress, and similar systems.
+PortalOps helps portal engineers identify issues, understand impact, and take action.
+
+This repository is currently Liferay-first and built as a native Liferay `portal-7.4-ga132` modular workspace.
+
+## PortalOps Principles
+
+PortalOps is operations-first.
+
+PortalOps optimizes for:
+
+- Findings
+- Risks
+- Governance
+- Operational investigations
+- Recommendations
+- Actions
+
+PortalOps does not optimize for chat conversations.
+
+## Product Direction
+
+PortalOps is not a monitoring dashboard, a generic chatbot, or an AI chat assistant.
+
+PortalOps is a modular operational intelligence platform with first-class product modules:
+
+- Overview
+- Assistant
+- Knowledge
+- Policy
+- Content
+- Workflow
+- Audit
+- System Health
+
+Navigation remains first-class. The Assistant helps users investigate issues and navigate into the appropriate PortalOps module. It does not replace the rest of the product.
 
 ## Architecture
 
 ```mermaid
-flowchart LR
-    User[Engineer / Support Team]
-    UI[PortalOps Web UI]
-    Command[Command Router]
-    Workflow[Workflow Capability]
-    Knowledge[Portal Knowledge Layer]
-    LLM[LLM SPI]
-    APIs[Liferay APIs / Portal Services]
+flowchart TD
+    User["Portal Engineer / Operations Engineer / Administrator"]
+    Assistant["PortalOps Assistant"]
+    Overview["PortalOps Overview"]
+    Analysis["PortalOps Analysis"]
+    Findings["Findings Cards"]
+    Recs["Recommendations"]
+    Actions["Actions"]
+    Modules["PortalOps Modules"]
+    Services["PortalOps Intelligence Services"]
+    Providers["AI Providers (Optional)"]
 
-    User --> UI
-    UI --> Command
-    Command --> Workflow
-    Workflow --> APIs
-    Workflow --> Knowledge
-    Knowledge --> LLM
+    User --> Overview
+    User --> Assistant
+    Assistant --> Analysis
+    Overview --> Findings
+    Analysis --> Services
+    Analysis --> Providers
+    Analysis --> Findings
+    Findings --> Recs
+    Recs --> Actions
+    Actions --> Modules
 ```
 
-## Features
+## Core Concepts
 
-- Platform-aware operational assistance for enterprise portals
-- Liferay 7.4 native modular architecture using OSGi bundles
-- Command-driven operational workflows
-- Structured portal knowledge snapshots
-- Workflow inspection as the first implemented MVP capability
-- Thin MVC portlet shell for operator interaction
-- Extensible AI provider boundary through SPI contracts
-- Clear separation between UI, orchestration, capability, and knowledge layers
+### Operational Intelligence
 
-## MVP
+PortalOps treats operational work as investigations, not conversations.
 
-Current MVP focus:
+Typical PortalOps questions include:
 
-- Liferay-first implementation
-- Core modular platform skeleton
-- Workflow inspection vertical slice
-- Read-only operational commands
-- Portal knowledge aggregation for workflow data
-- Thin web console for triggering supported commands
+- Analyze portal health
+- Show stale content
+- Review permission risks
+- Analyze search health
+- Explain failed workflows
+- Show recent changes
 
-Currently implemented command:
+PortalOps should answer:
 
-- `/show workflows pending`
+1. What did I find?
+2. Why does it matter?
+3. What should I do next?
 
-Current constraints:
+Detailed narrative explanation is secondary.
 
-- Read-only only
-- No destructive admin actions
-- No provider SDK integrations yet
-- No vector database or persistence layer yet
-- No Spring Boot backend in this workspace
+### Response Model
+
+PortalOps responses are built from:
+
+1. Summary
+2. Findings Cards
+3. Recommendations
+4. Actions
+
+Cards are reusable response primitives, not page-specific widgets.
+
+Examples:
+
+- `SearchFailureCard`
+- `StaleContentCard`
+- `PermissionRiskCard`
+- `WorkflowFailureCard`
+- `ConfigurationDriftCard`
+- `PolicyViolationCard`
+
+These response components can be reused across:
+
+- Overview
+- Assistant
+- Reports
+- Notifications
+
+### AI Provider Strategy
+
+PortalOps owns the user experience:
+
+- Response structure
+- Card taxonomy
+- Recommendations
+- Actions
+- Navigation semantics
+
+AI providers only supply analysis, correlation, summarization, and recommendations through a PortalOps-owned contract.
+
+Current provider direction:
+
+- `portalops-ai-api`
+- `portalops-ai-openai`
+
+Future provider bundles can include:
+
+- `portalops-ai-claude`
+- `portalops-ai-ollama`
+- `portalops-ai-gemini`
+- `portalops-ai-oip`
 
 ## Module Layout
 
 The current module set is organized under [modules](modules):
 
-- `portalops-api`: shared interfaces, DTOs, command models, and knowledge models
-- `portalops-command`: command parsing, intent routing, and handler dispatch
-- `portalops-policy`: authorization and guardrail abstractions
+- `portalops-api`: shared interfaces, DTOs, knowledge models, and core contracts
+- `portalops-assistant-api`: deterministic assistant request and response contracts
+- `portalops-assistant-service`: assistant command routing and handler execution
+- `portalops-ai-api`: provider-independent analysis contracts
+- `portalops-ai-openai`: initial OpenAI provider bundle scaffold
 - `portalops-audit`: audit event contracts and recording abstraction
-- `portalops-service`: orchestration facade
-- `portalops-web`: thin MVC portlet shell
+- `portalops-command`: existing command parsing and routing layer
+- `portalops-content`: content intelligence capability area
 - `portalops-knowledge`: structured portal knowledge aggregation
-- `portalops-llm-spi`: AI provider abstraction only
-- `portalops-workflow`: read-only workflow inspection capability
-- `portalops-permissions`: placeholder capability module
-- `portalops-content`: placeholder capability module
-- `portalops-site`: placeholder capability module
+- `portalops-llm-spi`: legacy provider abstraction area under transition
+- `portalops-permissions`: permissions and governance capability area
+- `portalops-policy`: authorization and guardrail abstractions
+- `portalops-service`: orchestration facade
+- `portalops-site`: site intelligence capability area
+- `portalops-web`: Liferay MVC module for Overview, Assistant, and product UI
+- `portalops-workflow`: workflow intelligence capability area
 
 ## Repo Structure
 
 ```text
 .
 ├── configs/
+├── docs/
+│   ├── architecture/
+│   └── ROADMAP.md
 ├── modules/
+│   ├── portalops-ai-api/
+│   ├── portalops-ai-openai/
 │   ├── portalops-api/
+│   ├── portalops-assistant-api/
+│   ├── portalops-assistant-service/
 │   ├── portalops-audit/
 │   ├── portalops-command/
 │   ├── portalops-content/
@@ -159,67 +251,21 @@ You can also use Blade shell helpers such as:
 blade sh lb
 ```
 
-## Current Vertical Slice
+## Documentation
 
-The first working end-to-end slice is workflow inspection for:
+Architecture docs:
 
-- `/show workflows pending`
-
-This slice runs through:
-
-1. MVC portlet UI
-2. command parsing and routing
-3. workflow inspection service
-4. knowledge aggregation
-5. structured result rendering
-
-The implementation uses supported Liferay workflow services including `WorkflowTaskManager`, `WorkflowInstanceManager`, `UserLocalService`, `RoleLocalService`, and `GroupLocalService`.
-
-## Roadmap
-
-### Phase 0
-
-- Core platform skeleton
-- Modular contracts and orchestration
-- Thin Liferay-native UI shell
-
-### Phase 1
-
-- Liferay-first workflow inspection
-- Structured portal knowledge for workflow data
-- First operational command vertical slice
-
-### Phase 2
-
-- AI command console improvements
-- Knowledge-aware explanations and summarization through SPI providers
-- Additional read-only operational capabilities
-
-### Phase 3
-
-- Permissions governance
-- Content governance
-- Site diagnostics and anomaly detection
-
-### Phase 4
-
-- Expanded platform adapters
-- Cross-platform portal operations model
-- Enterprise multi-platform PortalOps direction
-
-## Positioning
-
-PortalOps AI is not a generic chatbot.
-
-It is an enterprise portal operations product focused on:
-
-- workflow visibility
-- permissions governance
-- content hygiene
-- site intelligence
-- operational diagnostics
-- guided administrative actions
+- [Assistant Architecture](docs/architecture/assistant-architecture.md)
+- [Response Model](docs/architecture/response-model.md)
+- [AI Provider Architecture](docs/architecture/ai-provider-architecture.md)
+- [Operational Intelligence Philosophy](docs/architecture/operational-intelligence.md)
 
 ## Status
 
-Current maturity: prototype with a working Liferay-first MVP slice and a clear modular architecture for expansion.
+Current maturity: Liferay-first prototype evolving into an operational intelligence platform with:
+
+- intelligence-first Overview design
+- dedicated Assistant module direction
+- deterministic assistant command execution foundation
+- provider-independent analysis contracts
+- modular capability areas for content, workflow, governance, audit, and system health

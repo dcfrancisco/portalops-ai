@@ -1,8 +1,8 @@
 package com.portalops.web.internal.dashboard;
 
-import com.portalops.api.knowledge.PortalHealthSummary;
 import com.portalops.api.knowledge.PortalKnowledgeSnapshot;
 import com.portalops.api.service.PortalOpsRequestContext;
+import com.portalops.web.internal.display.DataSourceType;
 import com.portalops.web.internal.display.PortalOpsAssistantData;
 import com.portalops.web.internal.display.PortalOpsAssistantInsight;
 import com.portalops.web.internal.display.PortalOpsDashboardCard;
@@ -24,9 +24,6 @@ public class PortalOpsMockDashboardDataProviderComponent
             PortalOpsRequestContext portalOpsRequestContext,
             PortalKnowledgeSnapshot portalKnowledgeSnapshot) {
 
-        PortalHealthSummary portalHealthSummary =
-                portalKnowledgeSnapshot.getPortalHealthSummary();
-
         int pendingDrafts = portalKnowledgeSnapshot.getContentKnowledge().
                 getUnpublishedDrafts().size();
         int staleContent = portalKnowledgeSnapshot.getContentKnowledge().
@@ -37,210 +34,164 @@ public class PortalOpsMockDashboardDataProviderComponent
                 getStuckWorkflows().size();
         int riskyPermissions = portalKnowledgeSnapshot.getPermissionKnowledge().
                 getRiskyPermissions().size();
+        int openFindings = staleContent + pendingDrafts + riskyPermissions +
+                stuckWorkflows;
+        int recommendedActions = 4;
 
         return new PortalOpsDashboardData(
                 "Operational Command Center",
-                "Focus on active risks, stale content, search drift, and " +
-                        "access issues that need an administrator's attention.",
+                "Focus on findings, governance risks, operational recommendations, " +
+                        "and knowledge gaps that need administrator attention.",
                 List.of(
                         new PortalOpsDashboardSection(
-                                "environment-health", "Environment Health",
-                                "Runtime stability and dependency health across " +
-                                        "the current portal environment.",
-                                List.of(
-                                        new PortalOpsDashboardCard(
-                                                "Portal Status",
-                                                _getPortalStatus(portalHealthSummary),
-                                                _getPortalStatusType(
-                                                        portalHealthSummary),
-                                                "Overall environment posture",
-                                                _getPortalStatusNote(
-                                                        portalHealthSummary)),
-                                        new PortalOpsDashboardCard(
-                                                "Cluster Nodes", "3 / 3",
-                                                "success",
-                                                "All nodes reporting",
-                                                "No cluster partition or heartbeat loss detected."),
-                                        new PortalOpsDashboardCard(
-                                                "Active Users", "248",
-                                                "neutral",
-                                                "Current authenticated sessions",
-                                                "Within the normal weekday operating range."),
-                                        new PortalOpsDashboardCard(
-                                                "JVM Memory Usage", "72%",
-                                                "warning",
-                                                "Heap utilization",
-                                                "Usage is elevated but remains below the alert threshold."),
-                                        new PortalOpsDashboardCard(
-                                                "Database Connectivity", "Healthy",
-                                                "success",
-                                                "Primary datasource",
-                                                "Connection pool latency is stable with no recent failures."),
-                                        new PortalOpsDashboardCard(
-                                                "Search Engine Status", "Warning",
-                                                "warning",
-                                                "Search cluster sync",
-                                                "Index updates are trailing recent content changes."))),
-                        new PortalOpsDashboardSection(
                                 "content-intelligence", "Content Intelligence",
-                                "Content that is stale, scheduled, broken, or " +
-                                        "waiting for editorial action.",
+                                "Content findings that need governance, editorial, or lifecycle action.",
                                 List.of(
                                         new PortalOpsDashboardCard(
-                                                "Expired Web Content",
+                                                "Expired Content",
                                                 String.valueOf(Math.max(staleContent, 9)),
                                                 staleContent > 0 ? "warning" : "success",
                                                 "Needs review or retirement",
-                                                "Items are still visible in operational reporting despite expiration."),
+                                                "Expired content should be retired, refreshed, or republished intentionally.",
+                                                DataSourceType.MOCK),
                                         new PortalOpsDashboardCard(
-                                                "Scheduled Publications", "18",
-                                                "neutral",
-                                                "Next 14 days",
-                                                "A concentrated publishing window is approaching this week."),
-                                        new PortalOpsDashboardCard(
-                                                "Broken Content References", "6",
-                                                "critical",
-                                                "Fragments, pages, or assets",
-                                                "Broken references may cause incomplete page rendering."),
-                                        new PortalOpsDashboardCard(
-                                                "Draft Content Pending Approval",
+                                                "Pending Approvals",
                                                 String.valueOf(Math.max(pendingDrafts, 14)),
                                                 pendingDrafts > 0 ? "warning" : "success",
                                                 "Awaiting workflow decisions",
-                                                "Approval queues are building in at least one site."),
+                                                "Approval queues are building in at least one site.",
+                                                DataSourceType.LIVE),
                                         new PortalOpsDashboardCard(
-                                                "Recently Modified Content", "42",
-                                                "neutral",
-                                                "Updated in the last 24 hours",
-                                                "Recent change volume suggests reviewing search freshness."))),
+                                                "Stale Content",
+                                                String.valueOf(staleContent),
+                                                staleContent > 0 ? "warning" : "success",
+                                                "Low freshness signal",
+                                                "These assets have not been refreshed recently and may be drifting out of policy.",
+                                                DataSourceType.LIVE),
+                                        new PortalOpsDashboardCard(
+                                                "Content Without Owners", "11",
+                                                "warning",
+                                                "Governance gap",
+                                                "Some high-value content lacks an identified accountable owner.",
+                                                DataSourceType.COMING_SOON))),
                         new PortalOpsDashboardSection(
                                 "search-intelligence", "Search Intelligence",
-                                "Signals that show when discovery quality is slipping.",
+                                "Search issues that impact discovery quality and portal trust.",
                                 List.of(
-                                        new PortalOpsDashboardCard(
-                                                "Unindexed Content", "27",
-                                                "critical",
-                                                "Content newer than index coverage",
-                                                "These items may not appear in search until indexing catches up."),
-                                        new PortalOpsDashboardCard(
-                                                "Reindex Recommendations", "1",
-                                                "warning",
-                                                "Recommended actions",
-                                                "A scoped reindex is recommended for Web Content and Documents."),
                                         new PortalOpsDashboardCard(
                                                 "Search Failures", "8",
                                                 "warning",
                                                 "Last 24 hours",
-                                                "Most failures were timeout-related during peak load."),
-                                        new PortalOpsDashboardCard(
-                                                "Top Search Terms", "Pricing, Careers",
-                                                "neutral",
-                                                "Most common queries",
-                                                "High-interest topics can guide content and synonym tuning."),
-                                        new PortalOpsDashboardCard(
-                                                "Zero Result Searches", "11%",
-                                                "warning",
-                                                "Share of failed discovery",
-                                                "Refine mappings or create content for repeated no-result terms."))),
+                                                "Most failures were timeout-related during peak load.",
+                                                DataSourceType.MOCK))),
                         new PortalOpsDashboardSection(
-                                "user-security", "User & Security",
-                                "Identity, access, and account signals that deserve review.",
+                                "governance-audit", "Governance & Audit",
+                                "Permission, configuration, and audit findings that need review.",
                                 List.of(
                                         new PortalOpsDashboardCard(
-                                                "Failed Login Attempts", "37",
+                                                "Permission Risks",
+                                                String.valueOf(riskyPermissions),
                                                 "warning",
-                                                "Last 24 hours",
-                                                "Failed attempts are above baseline for this environment."),
-                                        new PortalOpsDashboardCard(
-                                                "Locked Accounts", "4",
-                                                "warning",
-                                                "Requires admin review",
-                                                "Confirm whether lockouts are user error or suspicious activity."),
-                                        new PortalOpsDashboardCard(
-                                                "Expiring Passwords", "19",
-                                                "neutral",
-                                                "Within 7 days",
-                                                "Password expiry reminders should be sent to affected users."),
-                                        new PortalOpsDashboardCard(
-                                                "Inactive Users", "12",
-                                                "warning",
-                                                "No login in 180 days",
-                                                "Review for deprovisioning or access cleanup."),
-                                        new PortalOpsDashboardCard(
-                                                "Service Account Activity", "Normal",
-                                                riskyPermissions > 0 ? "warning" : "success",
-                                                "Scheduled integrations",
-                                                riskyPermissions > 0 ?
-                                                        "Review elevated service account permissions." :
-                                                        "No abnormal spikes detected in service account activity."))),
-                        new PortalOpsDashboardSection(
-                                "system-operations", "System Operations",
-                                "Operational work queues, job failures, deployment activity, and audit change signals.",
-                                List.of(
-                                        new PortalOpsDashboardCard(
-                                                "Long Running Jobs", "2",
-                                                "warning",
-                                                "Running longer than expected",
-                                                "Two maintenance tasks exceeded their normal duration."),
-                                        new PortalOpsDashboardCard(
-                                                "Failed Scheduled Jobs",
-                                                String.valueOf(Math.max(stuckWorkflows, 1)),
-                                                stuckWorkflows > 0 ? "critical" : "warning",
-                                                "Recent scheduler failures",
-                                                "At least one recurring job has failed repeatedly."),
-                                        new PortalOpsDashboardCard(
-                                                "Recent Deployments", "3",
-                                                "neutral",
-                                                "Last 7 days",
-                                                "Use deployment timing to correlate with new incidents."),
+                                                "Elevated access detected",
+                                                "Review risky publish or configuration permissions before they become incidents.",
+                                                DataSourceType.LIVE),
                                         new PortalOpsDashboardCard(
                                                 "Configuration Changes", "5",
                                                 "warning",
                                                 "Last 48 hours",
-                                                "Recent config edits should be reviewed before further troubleshooting."),
+                                                "Recent config edits should be reviewed before further troubleshooting.",
+                                                DataSourceType.MOCK),
+                                        new PortalOpsDashboardCard(
+                                                "Configuration Drift", "3",
+                                                "warning",
+                                                "Baseline mismatch",
+                                                "Deployed runtime settings no longer fully match the expected operational baseline.",
+                                                DataSourceType.COMING_SOON),
                                         new PortalOpsDashboardCard(
                                                 "Audit Events", String.valueOf(Math.max(pendingWorkflows, 16)),
                                                 "neutral",
                                                 "Security and admin actions",
-                                                "Audit activity is elevated compared with the previous week.")))),
+                                                "Audit activity is elevated compared with the previous week.",
+                                                DataSourceType.MOCK))),
+                        new PortalOpsDashboardSection(
+                                "operations", "Operations",
+                                "Open findings and recommended next actions across PortalOps services.",
+                                List.of(
+                                        new PortalOpsDashboardCard(
+                                                "Failed Jobs",
+                                                String.valueOf(Math.max(stuckWorkflows, 1)),
+                                                stuckWorkflows > 0 ? "critical" : "warning",
+                                                "Recent scheduler failures",
+                                                "At least one recurring job has failed repeatedly.",
+                                                DataSourceType.LIVE),
+                                        new PortalOpsDashboardCard(
+                                                "Open Findings",
+                                                String.valueOf(openFindings),
+                                                openFindings > 0 ? "warning" : "success",
+                                                "Cross-domain issues",
+                                                "PortalOps has open findings across content, workflow, or governance domains.",
+                                                DataSourceType.MOCK),
+                                        new PortalOpsDashboardCard(
+                                                "Recommended Actions",
+                                                String.valueOf(recommendedActions),
+                                                "neutral",
+                                                "Next best actions",
+                                                "PortalOps recommends a short list of operational follow-ups right now.",
+                                                DataSourceType.MOCK))),
+                        new PortalOpsDashboardSection(
+                                "knowledge", "Knowledge",
+                                "Runbook and incident knowledge gaps that reduce operational readiness.",
+                                List.of(
+                                        new PortalOpsDashboardCard(
+                                                "Runbooks Requiring Review", "4",
+                                                "warning",
+                                                "Knowledge freshness",
+                                                "Several operational runbooks have not been reviewed against recent platform changes.",
+                                                DataSourceType.COMING_SOON),
+                                        new PortalOpsDashboardCard(
+                                                "Unresolved Operational Issues", "7",
+                                                "warning",
+                                                "Needs investigation",
+                                                "Known operational issues remain unresolved or unassigned.",
+                                                DataSourceType.COMING_SOON)))),
                 List.of(
                         new PortalOpsDashboardInsight(
                                 "Expiring content needs review",
-                                "34 web contents are scheduled to expire within 7 days.",
+                                "Expired and stale content continue to require editorial cleanup.",
                                 "warning", "Review Expiring Content", "content",
                                 "content-intelligence"),
                         new PortalOpsDashboardInsight(
-                                "Search freshness is lagging",
-                                "Search index is 3 days behind the latest content updates.",
-                                "critical", "Reindex Search", "dashboard",
-                                "search-intelligence"),
+                                "Permission review is a current governance need",
+                                "Risky permissions are present and should be validated against policy expectations.",
+                                "warning", "Review Permission Risks", "dashboard",
+                                "governance-audit"),
                         new PortalOpsDashboardInsight(
-                                "Inactive accounts can be cleaned up",
-                                "12 users have not logged in for 180 days.",
-                                "warning", "Manage Users", "dashboard",
-                                "user-security"),
+                                "Open findings should be triaged",
+                                "PortalOps has accumulated multiple open findings that need prioritization.",
+                                "critical", "Show Open Findings", "dashboard",
+                                "operations"),
                         new PortalOpsDashboardInsight(
                                 "A recurring job is failing",
                                 "One scheduled job has failed repeatedly and should be investigated.",
                                 "critical", "Review Scheduled Jobs", "workflow",
                                 ""),
                         new PortalOpsDashboardInsight(
-                                "Draft backlog is concentrated in Marketing",
-                                "Site Marketing contains 14 unpublished drafts pending review.",
+                                "Knowledge gaps are emerging",
+                                "Several operational runbooks require review before the next escalation cycle.",
                                 "warning", "Open Knowledge Assistant", "knowledge",
-                                "")),
+                                "knowledge")),
                 List.of(
                         new PortalOpsDashboardQuickAction(
-                                "Reindex Search", "reload", "dashboard",
-                                "search-intelligence", true),
+                                "Show Open Findings", "warning-full", "dashboard",
+                                "operations", true),
                         new PortalOpsDashboardQuickAction(
                                 "View Audit Logs", "list", "audit", "", false),
                         new PortalOpsDashboardQuickAction(
-                                "Review Expiring Content", "calendar", "content",
+                                "Review Expiring Content", "calendar", "dashboard",
                                 "content-intelligence", false),
                         new PortalOpsDashboardQuickAction(
-                                "Manage Users", "users", "dashboard",
-                                "user-security", false),
+                                "Review Permission Risks", "lock", "dashboard",
+                                "governance-audit", false),
                         new PortalOpsDashboardQuickAction(
                                 "Review Scheduled Jobs", "time", "workflow",
                                 "", false),
@@ -267,46 +218,6 @@ public class PortalOpsMockDashboardDataProviderComponent
                                 List.of(
                                         "Start with System Health or Stale Content.",
                                         "Use structured responses to guide follow-up actions."))));
-    }
-
-    private String _getPortalStatus(PortalHealthSummary portalHealthSummary) {
-        if (portalHealthSummary.getAnomalyCount() > 3) {
-            return "Critical";
-        }
-
-        if (portalHealthSummary.getAnomalyCount() > 0) {
-            return "Warning";
-        }
-
-        return "Healthy";
-    }
-
-    private String _getPortalStatusNote(
-            PortalHealthSummary portalHealthSummary) {
-
-        if (portalHealthSummary.getAnomalyCount() > 3) {
-            return "Multiple anomalies are affecting operational confidence.";
-        }
-
-        if (portalHealthSummary.getAnomalyCount() > 0) {
-            return "Some operational anomalies were detected and need review.";
-        }
-
-        return "No active anomaly patterns are reported by current knowledge sources.";
-    }
-
-    private String _getPortalStatusType(
-            PortalHealthSummary portalHealthSummary) {
-
-        if (portalHealthSummary.getAnomalyCount() > 3) {
-            return "critical";
-        }
-
-        if (portalHealthSummary.getAnomalyCount() > 0) {
-            return "warning";
-        }
-
-        return "success";
     }
 
 }

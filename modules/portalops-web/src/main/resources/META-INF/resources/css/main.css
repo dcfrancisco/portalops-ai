@@ -1,13 +1,54 @@
 .portalops-app {
-  padding: 1rem 0 2rem;
+  height: calc(100vh - var(--control-menu-container-height, 56px));
+  overflow: hidden;
+  padding: 1rem 0 1rem;
 }
 
-.portalops-header {
-  align-items: flex-start;
-  display: flex;
+.portalops-workbench {
+  display: grid;
   gap: 1rem;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
+  grid-template-columns: 17rem minmax(0, 1fr) 24rem;
+  height: 100%;
+}
+
+.portalops-workbench.portalops-workbench-collapsed {
+  grid-template-columns: 4.75rem minmax(0, 1fr) 24rem;
+}
+
+.portalops-workbench-nav,
+.portalops-workbench-context {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.portalops-workbench-center {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  min-width: 0;
+}
+
+.portalops-workbench-controls {
+  align-items: center;
+  display: flex;
+  margin-bottom: 0.75rem;
+}
+
+.portalops-sidebar-toggle {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.portalops-workbench.portalops-workbench-collapsed .portalops-sidebar-toggle .lexicon-icon {
+  transform: rotate(180deg);
+}
+
+.portalops-workspace-body {
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 0.25rem;
 }
 
 .portalops-eyebrow {
@@ -56,22 +97,19 @@
   color: #a11c1c;
 }
 
-.portalops-layout {
-  display: grid;
-  gap: 1.5rem;
-  grid-template-columns: 17rem minmax(0, 1fr);
-}
-
 .portalops-sidebar {
   border: 1px solid #e2e5e9;
-  position: sticky;
-  top: 1rem;
+  height: 100%;
 }
 
 .portalops-nav-item {
   align-items: center;
   display: flex;
   gap: 0.75rem;
+}
+
+.portalops-nav-label {
+  min-width: 0;
 }
 
 .portalops-nav-item.active {
@@ -91,9 +129,19 @@
   width: 1.25rem;
 }
 
-.portalops-layout-content {
-  min-width: 0;
-  overflow: visible;
+.portalops-workbench.portalops-workbench-collapsed .portalops-sidebar .card-body {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.portalops-workbench.portalops-workbench-collapsed .portalops-nav-item {
+  justify-content: center;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.portalops-workbench.portalops-workbench-collapsed .portalops-nav-label {
+  display: none;
 }
 
 .portalops-grid {
@@ -116,30 +164,9 @@
   gap: 1.5rem;
 }
 
-.portalops-dashboard-layout {
-  align-items: flex-start;
-  display: flex;
+.portalops-assistant-page {
+  display: grid;
   gap: 1.5rem;
-  overflow: visible;
-}
-
-.portalops-dashboard-main {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: visible;
-}
-
-.portalops-dashboard-assistant-column {
-  flex: 0 0 360px;
-  min-width: 360px;
-  width: 360px;
-}
-
-.portalops-dashboard-assistant-sticky {
-  align-self: flex-start;
-  position: sticky;
-  top: calc(var(--control-menu-container-height, 56px) + 1rem);
-  width: 100%;
 }
 
 .portalops-dashboard-section {
@@ -162,6 +189,11 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
+.portalops-grid-analysis {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 1rem;
+}
+
 .portalops-dashboard-card {
   border: 1px solid #e2e5e9;
   box-shadow: 0 0.5rem 1.5rem rgba(28, 28, 36, 0.06);
@@ -173,6 +205,28 @@
   display: flex;
   gap: 0.75rem;
   justify-content: space-between;
+}
+
+.portalops-data-source-badge {
+  display: inline-flex;
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-top: 0.35rem;
+}
+
+.portalops-data-source-badge-live {
+  background: #edf7ed;
+  color: #1f6b2c;
+}
+
+.portalops-data-source-badge-mock {
+  background: #eef2ff;
+  color: #23408e;
+}
+
+.portalops-data-source-badge-coming_soon {
+  background: #f5f5f8;
+  color: #6b6c7e;
 }
 
 .portalops-status-badge {
@@ -210,9 +264,20 @@
   grid-template-columns: minmax(0, 1.6fr) minmax(18rem, 1fr);
 }
 
-.portalops-assistant-card {
+.portalops-action-card,
+.portalops-assistant-card,
+.portalops-context-card,
+.portalops-recommendation-card {
   border: 1px solid #e2e5e9;
   box-shadow: 0 0.5rem 1.5rem rgba(28, 28, 36, 0.06);
+}
+
+.portalops-context-shell {
+  display: grid;
+  gap: 1rem;
+  height: 100%;
+  overflow: auto;
+  padding-right: 0.25rem;
 }
 
 .portalops-assistant-header,
@@ -221,6 +286,21 @@
 .portalops-assistant-insight {
   display: grid;
   gap: 0.75rem;
+}
+
+.portalops-context-actions,
+.portalops-context-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.portalops-context-list-item {
+  align-items: flex-start;
+  border: 1px solid #e7e7ed;
+  border-radius: 0.75rem;
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.85rem;
 }
 
 .portalops-assistant-prompt-row {
@@ -381,27 +461,24 @@
 }
 
 @media (max-width: 991px) {
-  .portalops-layout {
+  .portalops-app {
+    height: auto;
+    overflow: visible;
+  }
+
+  .portalops-workbench {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .portalops-workbench.portalops-workbench-collapsed {
     grid-template-columns: 1fr;
   }
 
-  .portalops-sidebar {
-    position: static;
-  }
-
-  .portalops-dashboard-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .portalops-dashboard-assistant-column {
-    flex-basis: auto;
-    min-width: 0;
-    width: auto;
-  }
-
-  .portalops-dashboard-assistant-sticky {
-    position: static;
+  .portalops-workbench-nav,
+  .portalops-workbench-context,
+  .portalops-workspace-body {
+    overflow: visible;
   }
 
   .portalops-grid {
@@ -409,6 +486,10 @@
   }
 
   .portalops-grid-dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .portalops-grid-analysis {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -418,10 +499,6 @@
 }
 
 @media (max-width: 767px) {
-  .portalops-header {
-    flex-direction: column;
-  }
-
   .portalops-assistant-prompt-row {
     grid-template-columns: 1fr;
   }
@@ -431,6 +508,10 @@
   }
 
   .portalops-grid-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .portalops-grid-analysis {
     grid-template-columns: 1fr;
   }
 

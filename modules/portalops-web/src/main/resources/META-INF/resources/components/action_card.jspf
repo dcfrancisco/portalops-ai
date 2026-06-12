@@ -1,0 +1,20 @@
+<%
+ActionLink portalOpsActionLink =
+    (ActionLink)request.getAttribute("PORTALOPS_ACTION_LINK");
+
+javax.portlet.PortletURL actionURL = renderResponse.createRenderURL();
+actionURL.setParameter("screen", portalOpsActionLink.getScreen());
+String actionHref = actionURL.toString();
+
+if (!portalOpsActionLink.getAnchor().isEmpty()) {
+    actionHref = actionHref + "#" + portalOpsActionLink.getAnchor();
+}
+%>
+
+<a class="portalops-action-card card" href="<%= HtmlUtil.escapeAttribute(actionHref) %>">
+  <div class="card-body">
+    <div class="portalops-metric-label">Action</div>
+    <div class="portalops-insight-title"><%= HtmlUtil.escape(portalOpsActionLink.getLabel()) %></div>
+    <div class="portalops-metric-help">Open the related PortalOps workflow.</div>
+  </div>
+</a>

@@ -1,0 +1,17 @@
+<%
+FindingCard findingCard =
+    (FindingCard)request.getAttribute("PORTALOPS_FINDING_CARD");
+%>
+
+<div class="portalops-dashboard-card card">
+  <div class="card-body">
+    <div class="portalops-dashboard-card-header">
+      <div class="portalops-metric-label"><%= HtmlUtil.escape(findingCard.getTitle()) %></div>
+      <span class="portalops-status-badge portalops-status-badge-<%= HtmlUtil.escapeAttribute(findingCard.getStatus()) %>">
+        <%= HtmlUtil.escape(findingCard.getStatus()) %>
+      </span>
+    </div>
+    <div class="portalops-metric-value"><%= HtmlUtil.escape(findingCard.getValue()) %></div>
+    <div class="portalops-metric-help"><%= HtmlUtil.escape(findingCard.getSummary()) %></div>
+  </div>
+</div>

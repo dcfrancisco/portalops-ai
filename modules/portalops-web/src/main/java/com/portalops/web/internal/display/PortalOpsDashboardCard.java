@@ -7,13 +7,18 @@ public class PortalOpsDashboardCard implements Serializable {
 
     public PortalOpsDashboardCard(
             String title, String value, String status, String context,
-            String note) {
+            String note, DataSourceType dataSourceType) {
 
         _context = Objects.requireNonNull(context);
+        _dataSourceType = Objects.requireNonNull(dataSourceType);
         _note = Objects.requireNonNull(note);
         _status = Objects.requireNonNull(status);
         _title = Objects.requireNonNull(title);
         _value = Objects.requireNonNull(value);
+    }
+
+    public DataSourceType getDataSourceType() {
+        return _dataSourceType;
     }
 
     public String getContext() {
@@ -37,6 +42,7 @@ public class PortalOpsDashboardCard implements Serializable {
     }
 
     private final String _context;
+    private final DataSourceType _dataSourceType;
     private final String _note;
     private final String _status;
     private final String _title;

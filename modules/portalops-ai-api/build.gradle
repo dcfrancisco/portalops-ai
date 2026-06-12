@@ -1,6 +1,4 @@
 dependencies {
 	compileOnly group: "com.liferay.portal", name: "release.portal.api"
 	compileOnly project(":modules:portalops-api")
-	compileOnly project(":modules:portalops-assistant-api")
-	compileOnly project(":modules:portalops-ai-api")
 }

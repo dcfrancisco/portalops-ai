@@ -1,0 +1,12 @@
+<%
+Recommendation recommendation =
+    (Recommendation)request.getAttribute("PORTALOPS_RECOMMENDATION");
+%>
+
+<div class="portalops-recommendation-card card">
+  <div class="card-body">
+    <div class="portalops-metric-label">Recommendation</div>
+    <div class="portalops-insight-title"><%= HtmlUtil.escape(recommendation.getTitle()) %></div>
+    <div class="portalops-metric-help"><%= HtmlUtil.escape(recommendation.getDescription()) %></div>
+  </div>
+</div>
