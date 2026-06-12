@@ -1,0 +1,21 @@
+<div class="portalops-sidebar card">
+  <div class="card-body p-0">
+    <div class="list-group list-group-flush">
+      <% for (PortalOpsNavigationItem navigationItem : viewData.getNavigationItems()) {
+           boolean active = navigationItem.getScreen().equals(viewData.getActiveScreen());
+           javax.portlet.PortletURL navigationURL = renderResponse.createRenderURL();
+           navigationURL.setParameter("screen", navigationItem.getScreen());
+      %>
+        <a
+          class="list-group-item list-group-item-action portalops-nav-item <%= active ? "active" : "" %>"
+          href="<%= navigationURL.toString() %>"
+        >
+          <span class="portalops-nav-icon">
+            <clay:icon symbol="<%= navigationItem.getIcon() %>" />
+          </span>
+          <span><%= HtmlUtil.escape(navigationItem.getLabel()) %></span>
+        </a>
+      <% } %>
+    </div>
+  </div>
+</div>

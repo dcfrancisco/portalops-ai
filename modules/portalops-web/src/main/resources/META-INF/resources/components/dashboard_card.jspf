@@ -1,0 +1,19 @@
+<%
+com.portalops.web.internal.display.PortalOpsDashboardCard dashboardCard =
+    (com.portalops.web.internal.display.PortalOpsDashboardCard)request.getAttribute(
+        "PORTALOPS_DASHBOARD_CARD");
+%>
+
+<div class="portalops-dashboard-card card">
+  <div class="card-body">
+    <div class="portalops-dashboard-card-header">
+      <div class="portalops-metric-label"><%= HtmlUtil.escape(dashboardCard.getTitle()) %></div>
+      <span class="portalops-status-badge portalops-status-badge-<%= HtmlUtil.escapeAttribute(dashboardCard.getStatus()) %>">
+        <%= HtmlUtil.escape(dashboardCard.getContext()) %>
+      </span>
+    </div>
+
+    <div class="portalops-metric-value"><%= HtmlUtil.escape(dashboardCard.getValue()) %></div>
+    <div class="portalops-metric-help"><%= HtmlUtil.escape(dashboardCard.getNote()) %></div>
+  </div>
+</div>

@@ -1,0 +1,6 @@
+Bundle-Name: PortalOps Assistant API
+Bundle-SymbolicName: com.portalops.assistant.api
+Bundle-Version: 1.0.0
+Export-Package: \
+	com.portalops.assistant.api,\
+	com.portalops.assistant.api.payload

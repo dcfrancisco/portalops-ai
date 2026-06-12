@@ -1,56 +1,41 @@
-<%@ page import="com.liferay.portal.kernel.util.HtmlUtil" %>
-<%@ page import="com.portalops.api.command.PortalOpsCommandResult" %>
-<%@ taglib uri="http://java.sun.com/portlet_2_0" prefix="portlet" %>
-<%
-String currentCommand = (String)request.getAttribute("PORTALOPS_CURRENT_COMMAND");
+<%@ include file="/init.jsp" %>
 
-if (currentCommand == null) {
-  currentCommand = "/show workflows pending";
-}
-
-PortalOpsCommandResult commandResult =
-    (PortalOpsCommandResult)request.getAttribute("PORTALOPS_COMMAND_RESULT");
-%>
-<div class="portalops-shell">
-  <h2>PortalOps AI</h2>
-  <p>
-    The first MVP workflow slice is active. The command console can now inspect
-    pending workflow tasks through supported Liferay workflow APIs.
-  </p>
-
-  <portlet:renderURL var="portalOpsCommandURL" />
-
-  <form action="<%= portalOpsCommandURL %>" method="get">
-    <input name="<portlet:namespace />runCommand" type="hidden" value="true" />
-
-    <div class="portalops-console-placeholder">
-      <label for="portalops-command-input">Command input</label>
-      <input
-        id="portalops-command-input"
-        name="<portlet:namespace />command"
-        type="text"
-        value="<%= HtmlUtil.escapeAttribute(currentCommand) %>"
-      />
-      <button type="submit">Run command</button>
+<div class="portalops-app">
+  <div class="portalops-header">
+    <div>
+      <div class="portalops-eyebrow">Control Panel Application</div>
+      <h1 class="portalops-page-title"><%= HtmlUtil.escape(viewData.getPageTitle()) %></h1>
+      <p class="portalops-page-subtitle">
+        <%= HtmlUtil.escape(viewData.getPageSubtitle()) %>
+      </p>
     </div>
-  </form>
+    <div class="portalops-status-chip portalops-status-chip-<%= HtmlUtil.escapeAttribute(viewData.getStatusType()) %>">
+      <clay:icon symbol="check-circle" />
+      <span><%= HtmlUtil.escape(viewData.getStatusLabel()) %></span>
+    </div>
+  </div>
 
-  <h3>Supported MVP command</h3>
-  <ul>
-    <li>/show workflows pending</li>
-  </ul>
+  <div class="portalops-layout">
+    <aside class="portalops-layout-sidebar">
+      <%@ include file="/navigation.jspf" %>
+    </aside>
 
-  <h3>Result panel</h3>
-  <% if (commandResult == null) { %>
-    <p>Run the command to inspect pending workflow tasks for the current site scope.</p>
-  <% } else { %>
-    <p><strong><%= HtmlUtil.escape(commandResult.getTitle()) %></strong></p>
-    <p><%= HtmlUtil.escape(commandResult.getSummary()) %></p>
-
-    <ul>
-      <% for (String line : commandResult.getLines()) { %>
-        <li><%= HtmlUtil.escape(line) %></li>
+    <section class="portalops-layout-content">
+      <% if ("knowledge".equals(viewData.getActiveScreen())) { %>
+        <jsp:include page="/views/knowledge.jsp" />
+      <% } else if ("policy".equals(viewData.getActiveScreen())) { %>
+        <jsp:include page="/views/policy.jsp" />
+      <% } else if ("content".equals(viewData.getActiveScreen())) { %>
+        <jsp:include page="/views/content.jsp" />
+      <% } else if ("workflow".equals(viewData.getActiveScreen())) { %>
+        <jsp:include page="/views/workflow.jsp" />
+      <% } else if ("audit".equals(viewData.getActiveScreen())) { %>
+        <jsp:include page="/views/audit.jsp" />
+      <% } else if ("settings".equals(viewData.getActiveScreen())) { %>
+        <jsp:include page="/views/settings.jsp" />
+      <% } else { %>
+        <jsp:include page="/views/dashboard.jsp" />
       <% } %>
-    </ul>
-  <% } %>
+    </section>
+  </div>
 </div>

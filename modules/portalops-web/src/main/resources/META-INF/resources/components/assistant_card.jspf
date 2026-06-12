@@ -1,0 +1,76 @@
+<%
+PortalOpsAssistantData assistantData = dashboardData.getAssistantData();
+String assistantInputId =
+    renderResponse.getNamespace() + "portalOpsAssistantPrompt";
+String assistantCommandInputId =
+    renderResponse.getNamespace() + "portalOpsAssistantCommand";
+%>
+
+<section class="card portalops-assistant-card">
+  <div class="card-body">
+    <div class="portalops-assistant-header">
+      <div class="portalops-section-title"><%= HtmlUtil.escape(assistantData.getTitle()) %></div>
+      <p class="portalops-section-subtitle"><%= HtmlUtil.escape(assistantData.getDescription()) %></p>
+    </div>
+
+    <portlet:renderURL var="portalOpsAssistantURL">
+      <portlet:param name="screen" value="dashboard" />
+    </portlet:renderURL>
+
+    <div class="portalops-assistant-prompt">
+      <label class="portalops-metric-label" for="<%= HtmlUtil.escapeAttribute(assistantInputId) %>">
+        Prompt Input
+      </label>
+
+      <form action="<%= portalOpsAssistantURL %>" method="get">
+        <input id="<%= HtmlUtil.escapeAttribute(assistantCommandInputId) %>" name="<portlet:namespace />assistantCommand" type="hidden" />
+        <input name="<portlet:namespace />screen" type="hidden" value="dashboard" />
+
+        <div class="portalops-assistant-prompt-row">
+          <input
+            class="form-control"
+            id="<%= HtmlUtil.escapeAttribute(assistantInputId) %>"
+            name="<portlet:namespace />assistantPrompt"
+            placeholder="<%= HtmlUtil.escapeAttribute(assistantData.getPlaceholder()) %>"
+            type="text"
+            value="<%= HtmlUtil.escapeAttribute(assistantPromptValue == null ? "" : assistantPromptValue) %>"
+          />
+
+          <button class="btn btn-primary" type="submit">
+            <%= HtmlUtil.escape(assistantData.getActionLabel()) %>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <%@ include file="/components/suggested_prompt_list.jspf" %>
+    <%@ include file="/components/assistant_insight_card.jspf" %>
+  </div>
+</section>
+
+<script>
+  (function() {
+    var promptInput = document.getElementById('<%= HtmlUtil.escapeJS(assistantInputId) %>');
+    var commandInput = document.getElementById('<%= HtmlUtil.escapeJS(assistantCommandInputId) %>');
+
+    if (!promptInput || !commandInput) {
+      return;
+    }
+
+    var promptButtons = document.querySelectorAll(
+      '[data-portalops-assistant-prompt="<%= HtmlUtil.escapeJS(renderResponse.getNamespace()) %>"]'
+    );
+
+    promptInput.addEventListener('input', function() {
+      commandInput.value = '';
+    });
+
+    promptButtons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        promptInput.value = button.getAttribute('data-prompt') || '';
+        commandInput.value = button.getAttribute('data-command') || '';
+        promptInput.focus();
+      });
+    });
+  })();
+</script>

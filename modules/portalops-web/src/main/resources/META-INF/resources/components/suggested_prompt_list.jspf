@@ -1,0 +1,18 @@
+<div class="portalops-assistant-prompts">
+  <div class="portalops-metric-label">Suggested Prompts</div>
+
+  <div class="portalops-assistant-prompt-list">
+    <% for (String prompt : assistantData.getSuggestedPrompts()) { %>
+      <button
+        class="btn btn-secondary btn-sm portalops-assistant-prompt-chip"
+        data-portalops-assistant-prompt="<%= HtmlUtil.escapeAttribute(renderResponse.getNamespace()) %>"
+        data-command="<%= HtmlUtil.escapeAttribute(
+            prompt.toUpperCase().replace(' ', '_')) %>"
+        data-prompt="<%= HtmlUtil.escapeAttribute(prompt) %>"
+        type="button"
+      >
+        <%= HtmlUtil.escape(prompt) %>
+      </button>
+    <% } %>
+  </div>
+</div>
