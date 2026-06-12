@@ -334,8 +334,19 @@ public class PortalOpsPortlet extends MVCPortlet {
                     RenderRequest renderRequest,
                     PortalOpsRequestContext portalOpsRequestContext) {
 
+        String assistantMode = ParamUtil.getString(
+                renderRequest, "assistantMode");
         String assistantPrompt = ParamUtil.getString(
                 renderRequest, "assistantPrompt");
+
+        if ("prompt".equals(assistantMode)) {
+            if (assistantPrompt.isEmpty()) {
+                return null;
+            }
+
+            return _getSimulatedAssistantResponse(assistantPrompt);
+        }
+
         AssistantCommand assistantCommand = _resolveAssistantCommand(
                 renderRequest);
 
@@ -455,7 +466,7 @@ public class PortalOpsPortlet extends MVCPortlet {
 
             return new PortalOpsAssistantResponse<>(
                     AssistantStatus.WARNING, "Search Health Analysis",
-                    "I simulated a PortalOps analysis for search and found signals worth reviewing.",
+                    "I reviewed your prompt and simulated a PortalOps search analysis with a few signals worth checking.",
                     List.of(
                             "Search failures are clustered around recent content updates.",
                             "One index freshness signal suggests a delayed synchronization window.",
@@ -474,7 +485,7 @@ public class PortalOpsPortlet extends MVCPortlet {
 
             return new PortalOpsAssistantResponse<>(
                     AssistantStatus.WARNING, "Content Investigation",
-                    "I simulated a content review and found several items that may need editorial attention.",
+                    "I reviewed your prompt and simulated a content investigation with editorial follow-up items.",
                     List.of(
                             "Multiple content items appear stale relative to their ownership cycle.",
                             "A small group of drafts has been sitting without approval follow-up.",
@@ -494,7 +505,7 @@ public class PortalOpsPortlet extends MVCPortlet {
 
             return new PortalOpsAssistantResponse<>(
                     AssistantStatus.WARNING, "Permission Risk Review",
-                    "I simulated an audit-focused analysis and found permission patterns that deserve a closer look.",
+                    "I reviewed your prompt and simulated a permission analysis with a few governance concerns.",
                     List.of(
                             "Recent permission changes include elevated access on sensitive resources.",
                             "A few high-impact roles should be reviewed against expected ownership.",
@@ -513,7 +524,7 @@ public class PortalOpsPortlet extends MVCPortlet {
 
             return new PortalOpsAssistantResponse<>(
                     AssistantStatus.WARNING, "Workflow Review",
-                    "I simulated a workflow investigation and found items that may be blocking content progression.",
+                    "I reviewed your prompt and simulated a workflow investigation with possible blockage signals.",
                     List.of(
                             "At least one workflow appears to be retrying without resolution.",
                             "Pending approvals are concentrated in a small set of content owners.",
@@ -529,7 +540,7 @@ public class PortalOpsPortlet extends MVCPortlet {
 
         return new PortalOpsAssistantResponse<>(
                 AssistantStatus.INFO, "PortalOps Analysis",
-                "I simulated a PortalOps investigation for your prompt and generated a draft response pattern.",
+                "I reviewed your prompt and generated a simulated PortalOps response in the assistant panel.",
                 List.of(
                         "PortalOps can translate this request into findings across content, search, audit, and workflow domains.",
                         "No live AI provider is configured yet, so this response is mocked for UI validation.",
