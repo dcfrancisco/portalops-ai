@@ -9,11 +9,12 @@
         <a
           class="list-group-item list-group-item-action portalops-nav-item <%= active ? "active" : "" %>"
           href="<%= navigationURL.toString() %>"
+          title="<%= HtmlUtil.escapeAttribute(navigationItem.getLabel()) %>"
         >
           <span class="portalops-nav-icon">
             <clay:icon symbol="<%= navigationItem.getIcon() %>" />
           </span>
-          <span><%= HtmlUtil.escape(navigationItem.getLabel()) %></span>
+          <span class="portalops-nav-label"><%= HtmlUtil.escape(navigationItem.getLabel()) %></span>
         </a>
       <% } %>
     </div>
