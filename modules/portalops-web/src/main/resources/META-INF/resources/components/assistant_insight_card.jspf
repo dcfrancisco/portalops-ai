@@ -4,10 +4,15 @@ PortalOpsAssistantInsight assistantInsight = assistantData.getInsight();
 
 <section class="portalops-assistant-insight">
   <% if (assistantResponse != null) { %>
-    <div class="portalops-section-title"><%= HtmlUtil.escape(assistantResponse.getTitle()) %></div>
+    <% if ((assistantPromptValue != null) && !assistantPromptValue.isEmpty()) { %>
+      <div class="portalops-assistant-prompt-bubble">
+        <span class="portalops-metric-label">Prompt</span>
+        <div class="portalops-assistant-prompt-copy"><%= HtmlUtil.escape(assistantPromptValue) %></div>
+      </div>
+    <% } %>
 
     <div class="alert alert-<%= (assistantResponse.getStatus() == AssistantStatus.ERROR) ? "danger" : ((assistantResponse.getStatus() == AssistantStatus.WARNING) ? "warning" : "info") %> portalops-assistant-alert" role="alert">
-      <strong><%= HtmlUtil.escape(assistantResponse.getStatus().name()) %></strong>
+      <strong><%= HtmlUtil.escape(assistantResponse.getTitle()) %></strong>
       <span><%= HtmlUtil.escape(assistantResponse.getSummary()) %></span>
     </div>
 
@@ -141,10 +146,8 @@ PortalOpsAssistantInsight assistantInsight = assistantData.getInsight();
       </div>
     <% } %>
   <% } else { %>
-    <div class="portalops-section-title"><%= HtmlUtil.escape(assistantInsight.getTitle()) %></div>
-
     <div class="portalops-assistant-status">
-      <span class="portalops-metric-label">Status</span>
+      <span class="portalops-metric-label"><%= HtmlUtil.escape(assistantInsight.getTitle()) %></span>
       <span class="portalops-status-badge portalops-status-badge-neutral">
         <%= HtmlUtil.escape(assistantInsight.getStatus()) %>
       </span>

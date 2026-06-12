@@ -12,6 +12,7 @@ import com.portalops.ai.api.ActionLink;
 import com.portalops.ai.api.FindingCard;
 import com.portalops.ai.api.PortalOpsAnalysisResponse;
 import com.portalops.ai.api.Recommendation;
+import com.portalops.assistant.api.AssistantAction;
 import com.portalops.assistant.api.AssistantCommand;
 import com.portalops.assistant.api.AssistantStatus;
 import com.portalops.assistant.api.AssistantCommandRouter;
@@ -332,11 +333,17 @@ public class PortalOpsPortlet extends MVCPortlet {
                     RenderRequest renderRequest,
                     PortalOpsRequestContext portalOpsRequestContext) {
 
+        String assistantPrompt = ParamUtil.getString(
+                renderRequest, "assistantPrompt");
         AssistantCommand assistantCommand = _resolveAssistantCommand(
                 renderRequest);
 
-        if (assistantCommand == null) {
+        if (assistantPrompt.isEmpty() && (assistantCommand == null)) {
             return null;
+        }
+
+        if (assistantCommand == null) {
+            return _getSimulatedAssistantResponse(assistantPrompt);
         }
 
         return _assistantCommandRouter.route(
@@ -344,8 +351,7 @@ public class PortalOpsPortlet extends MVCPortlet {
                         assistantCommand,
                         Map.of(
                                 "prompt",
-                                ParamUtil.getString(
-                                        renderRequest, "assistantPrompt")),
+                                assistantPrompt),
                         portalOpsRequestContext));
     }
 
@@ -435,6 +441,115 @@ public class PortalOpsPortlet extends MVCPortlet {
             default:
                 return null;
         }
+    }
+
+    private PortalOpsAssistantResponse<? extends AssistantPayload>
+            _getSimulatedAssistantResponse(String assistantPrompt) {
+
+        String normalizedPrompt = assistantPrompt.trim();
+        String lowerCasePrompt = normalizedPrompt.toLowerCase(Locale.ROOT);
+
+        if (_containsAny(
+                lowerCasePrompt, "search", "index", "reindex")) {
+
+            return new PortalOpsAssistantResponse<>(
+                    AssistantStatus.WARNING, "Search Health Analysis",
+                    "I simulated a PortalOps analysis for search and found signals worth reviewing.",
+                    List.of(
+                            "Search failures are clustered around recent content updates.",
+                            "One index freshness signal suggests a delayed synchronization window.",
+                            "Zero-result queries are trending higher for marketing content."),
+                    List.of(
+                            "Review recent indexing jobs before scheduling a full reindex.",
+                            "Inspect failed search requests tied to the latest content changes."),
+                    List.of(
+                            new AssistantAction("Open Search Health", "assistant"),
+                            new AssistantAction("Review Recent Changes", "audit")),
+                    null);
+        }
+
+        if (_containsAny(
+                lowerCasePrompt, "stale", "expired", "content", "draft")) {
+
+            return new PortalOpsAssistantResponse<>(
+                    AssistantStatus.WARNING, "Content Investigation",
+                    "I simulated a content review and found several items that may need editorial attention.",
+                    List.of(
+                            "Multiple content items appear stale relative to their ownership cycle.",
+                            "A small group of drafts has been sitting without approval follow-up.",
+                            "Several expiring items should be reviewed before the next publishing window."),
+                    List.of(
+                            "Review stale content first and confirm ownership.",
+                            "Clear pending approvals before the next content release."),
+                    List.of(
+                            new AssistantAction("Review Content", "content"),
+                            new AssistantAction("Open Knowledge", "knowledge")),
+                    null);
+        }
+
+        if (_containsAny(
+                lowerCasePrompt, "permission", "permissions", "audit", "risk",
+                "security", "access")) {
+
+            return new PortalOpsAssistantResponse<>(
+                    AssistantStatus.WARNING, "Permission Risk Review",
+                    "I simulated an audit-focused analysis and found permission patterns that deserve a closer look.",
+                    List.of(
+                            "Recent permission changes include elevated access on sensitive resources.",
+                            "A few high-impact roles should be reviewed against expected ownership.",
+                            "Audit activity suggests configuration-related access changes."),
+                    List.of(
+                            "Review elevated permissions before the next release window.",
+                            "Compare recent access changes with approved governance policies."),
+                    List.of(
+                            new AssistantAction("Open Audit", "audit"),
+                            new AssistantAction("Review Policy", "policy")),
+                    null);
+        }
+
+        if (_containsAny(
+                lowerCasePrompt, "workflow", "approval", "failed", "stuck")) {
+
+            return new PortalOpsAssistantResponse<>(
+                    AssistantStatus.WARNING, "Workflow Review",
+                    "I simulated a workflow investigation and found items that may be blocking content progression.",
+                    List.of(
+                            "At least one workflow appears to be retrying without resolution.",
+                            "Pending approvals are concentrated in a small set of content owners.",
+                            "A failed workflow may be impacting scheduled publishing."),
+                    List.of(
+                            "Review failed workflows first to unblock pending content.",
+                            "Confirm approver assignments for delayed workflow queues."),
+                    List.of(
+                            new AssistantAction("Open Workflow", "workflow"),
+                            new AssistantAction("Review Content", "content")),
+                    null);
+        }
+
+        return new PortalOpsAssistantResponse<>(
+                AssistantStatus.INFO, "PortalOps Analysis",
+                "I simulated a PortalOps investigation for your prompt and generated a draft response pattern.",
+                List.of(
+                        "PortalOps can translate this request into findings across content, search, audit, and workflow domains.",
+                        "No live AI provider is configured yet, so this response is mocked for UI validation.",
+                        "The current assistant flow is ready to swap to a real provider later."),
+                List.of(
+                        "Refine the prompt around content, search, permissions, workflows, or recent changes.",
+                        "Add an AI provider later without changing the right-rail interaction model."),
+                List.of(
+                        new AssistantAction("Open Overview", "dashboard"),
+                        new AssistantAction("Review System Health", "settings")),
+                null);
+    }
+
+    private boolean _containsAny(String value, String... candidates) {
+        for (String candidate : candidates) {
+            if (value.contains(candidate)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private List<ActionLink> _toActionLinks(

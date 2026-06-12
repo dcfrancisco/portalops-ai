@@ -4,116 +4,140 @@ String assistantInputId =
     renderResponse.getNamespace() + "portalOpsAssistantPrompt";
 String assistantCommandInputId =
     renderResponse.getNamespace() + "portalOpsAssistantCommand";
+String contextTabsId =
+    renderResponse.getNamespace() + "portalOpsContextTabs";
 %>
 
 <div class="portalops-context-shell">
-  <section class="card portalops-context-card">
-    <div class="card-body">
-      <div class="portalops-section-title">Assistant Context</div>
-      <p class="portalops-section-subtitle">
-        Launch investigations from here. Results open in the center workspace.
-      </p>
+  <section class="card portalops-context-card portalops-context-tabs-card" id="<%= HtmlUtil.escapeAttribute(contextTabsId) %>">
+    <div class="card-body portalops-context-tabs-body">
+      <div class="portalops-context-tabs-header" role="tablist" aria-label="PortalOps context tabs">
+        <button
+          aria-selected="true"
+          class="portalops-context-tab is-active"
+          data-tab-target="portalops"
+          role="tab"
+          type="button"
+        >
+          PortalOps
+        </button>
+        <button
+          aria-selected="false"
+          class="portalops-context-tab"
+          data-tab-target="findings"
+          role="tab"
+          type="button"
+        >
+          Findings
+        </button>
+        <button
+          aria-selected="false"
+          class="portalops-context-tab"
+          data-tab-target="actions"
+          role="tab"
+          type="button"
+        >
+          Actions
+        </button>
+      </div>
 
-      <portlet:renderURL var="portalOpsAssistantURL">
-        <portlet:param name="screen" value="assistant" />
-      </portlet:renderURL>
-
-      <div class="portalops-assistant-prompt">
-        <label class="portalops-metric-label" for="<%= HtmlUtil.escapeAttribute(assistantInputId) %>">
-          Investigation Prompt
-        </label>
-
-        <form action="<%= portalOpsAssistantURL %>" method="get">
-          <input id="<%= HtmlUtil.escapeAttribute(assistantCommandInputId) %>" name="<portlet:namespace />assistantCommand" type="hidden" />
-          <input name="<portlet:namespace />screen" type="hidden" value="assistant" />
-
-          <div class="portalops-assistant-prompt-row">
-            <input
-              class="form-control"
-              id="<%= HtmlUtil.escapeAttribute(assistantInputId) %>"
-              name="<portlet:namespace />assistantPrompt"
-              placeholder="<%= HtmlUtil.escapeAttribute(assistantData.getPlaceholder()) %>"
-              type="text"
-              value="<%= HtmlUtil.escapeAttribute(assistantPromptValue == null ? "" : assistantPromptValue) %>"
-            />
-
-            <button class="btn btn-primary" type="submit">
-              Analyze
-            </button>
+      <div class="portalops-context-tab-panels">
+        <section class="portalops-context-tab-panel portalops-context-tab-panel-assistant is-active" data-tab-panel="portalops" role="tabpanel">
+          <div class="portalops-context-assistant-response">
+            <% if (assistantResponse != null) { %>
+              <%@ include file="/components/assistant_insight_card.jspf" %>
+            <% } %>
           </div>
-        </form>
-      </div>
 
-      <%@ include file="/components/suggested_prompt_list.jspf" %>
-    </div>
-  </section>
+          <portlet:renderURL var="portalOpsAssistantURL" />
 
-  <section class="card portalops-context-card">
-    <div class="card-body">
-      <div class="portalops-section-title">Recent Findings</div>
-      <p class="portalops-section-subtitle">A quick scan of current operational signals.</p>
+          <div class="portalops-assistant-prompt portalops-context-assistant-composer">
+            <form action="<%= portalOpsAssistantURL %>" method="get">
+              <input id="<%= HtmlUtil.escapeAttribute(assistantCommandInputId) %>" name="<portlet:namespace />assistantCommand" type="hidden" />
+              <input name="<portlet:namespace />screen" type="hidden" value="<%= HtmlUtil.escapeAttribute(viewData.getActiveScreen()) %>" />
 
-      <div class="portalops-context-list">
-        <% if (analysisResponse != null) { %>
-          <% for (FindingCard findingCard : analysisResponse.getFindingCards()) { %>
-            <div class="portalops-context-list-item">
-              <span class="portalops-status-badge portalops-status-badge-<%= HtmlUtil.escapeAttribute(findingCard.getStatus()) %>">
-                <%= HtmlUtil.escape(findingCard.getValue()) %>
-              </span>
-              <div>
-                <div class="portalops-insight-title"><%= HtmlUtil.escape(findingCard.getTitle()) %></div>
-                <div class="portalops-metric-help"><%= HtmlUtil.escape(findingCard.getSummary()) %></div>
+              <div class="portalops-assistant-prompt-row">
+                <input
+                  class="form-control"
+                  id="<%= HtmlUtil.escapeAttribute(assistantInputId) %>"
+                  name="<portlet:namespace />assistantPrompt"
+                  placeholder="<%= HtmlUtil.escapeAttribute(assistantData.getPlaceholder()) %>"
+                  type="text"
+                  value="<%= HtmlUtil.escapeAttribute(assistantPromptValue == null ? "" : assistantPromptValue) %>"
+                />
+
+                <button class="btn btn-secondary btn-sm portalops-context-submit" type="submit">
+                  Run
+                </button>
               </div>
-            </div>
-          <% } %>
-        <% } else { %>
-          <% for (PortalOpsDashboardInsight insight : dashboardData.getInsights()) { %>
-            <div class="portalops-context-list-item">
-              <span class="portalops-status-badge portalops-status-badge-<%= HtmlUtil.escapeAttribute(insight.getSeverity()) %>">
-                <%= HtmlUtil.escape(insight.getSeverity()) %>
-              </span>
-              <div>
-                <div class="portalops-insight-title"><%= HtmlUtil.escape(insight.getTitle()) %></div>
-                <div class="portalops-metric-help"><%= HtmlUtil.escape(insight.getDescription()) %></div>
-              </div>
-            </div>
-          <% } %>
-        <% } %>
-      </div>
-    </div>
-  </section>
+            </form>
 
-  <section class="card portalops-context-card">
-    <div class="card-body">
-      <div class="portalops-section-title">Recommended Actions</div>
-      <p class="portalops-section-subtitle">Use actions to move into operational workflows.</p>
+          </div>
+        </section>
 
-      <div class="portalops-context-actions">
-        <% if ((analysisResponse != null) && !analysisResponse.getActionLinks().isEmpty()) { %>
-          <% for (ActionLink actionLink : analysisResponse.getActionLinks()) {
-               request.setAttribute("PORTALOPS_ACTION_LINK", actionLink);
-          %>
-            <%@ include file="/components/action_card.jspf" %>
-          <% } %>
-        <% } else { %>
-          <% for (PortalOpsDashboardQuickAction quickAction : dashboardData.getQuickActions()) {
-               javax.portlet.PortletURL quickActionURL = renderResponse.createRenderURL();
-               quickActionURL.setParameter("screen", quickAction.getScreen());
-               String quickActionHref = quickActionURL.toString();
+        <section class="portalops-context-tab-panel portalops-context-tab-panel-scrollable" data-tab-panel="findings" role="tabpanel" hidden>
+          <p class="portalops-section-subtitle">A quick scan of current operational signals.</p>
 
-               if (!quickAction.getAnchor().isEmpty()) {
-                   quickActionHref = quickActionHref + "#" + quickAction.getAnchor();
-               }
-          %>
-            <a class="portalops-action-card card" href="<%= HtmlUtil.escapeAttribute(quickActionHref) %>">
-              <div class="card-body">
-                <div class="portalops-metric-label">Action</div>
-                <div class="portalops-insight-title"><%= HtmlUtil.escape(quickAction.getLabel()) %></div>
-                <div class="portalops-metric-help">Jump directly into the related PortalOps module.</div>
-              </div>
-            </a>
-          <% } %>
-        <% } %>
+          <div class="portalops-context-list">
+            <% if (analysisResponse != null) { %>
+              <% for (FindingCard findingCard : analysisResponse.getFindingCards()) { %>
+                <div class="portalops-context-list-item">
+                  <span class="portalops-status-badge portalops-status-badge-<%= HtmlUtil.escapeAttribute(findingCard.getStatus()) %>">
+                    <%= HtmlUtil.escape(findingCard.getValue()) %>
+                  </span>
+                  <div>
+                    <div class="portalops-insight-title"><%= HtmlUtil.escape(findingCard.getTitle()) %></div>
+                    <div class="portalops-metric-help"><%= HtmlUtil.escape(findingCard.getSummary()) %></div>
+                  </div>
+                </div>
+              <% } %>
+            <% } else { %>
+              <% for (PortalOpsDashboardInsight insight : dashboardData.getInsights()) { %>
+                <div class="portalops-context-list-item">
+                  <span class="portalops-status-badge portalops-status-badge-<%= HtmlUtil.escapeAttribute(insight.getSeverity()) %>">
+                    <%= HtmlUtil.escape(insight.getSeverity()) %>
+                  </span>
+                  <div>
+                    <div class="portalops-insight-title"><%= HtmlUtil.escape(insight.getTitle()) %></div>
+                    <div class="portalops-metric-help"><%= HtmlUtil.escape(insight.getDescription()) %></div>
+                  </div>
+                </div>
+              <% } %>
+            <% } %>
+          </div>
+        </section>
+
+        <section class="portalops-context-tab-panel portalops-context-tab-panel-scrollable" data-tab-panel="actions" role="tabpanel" hidden>
+          <p class="portalops-section-subtitle">Use actions to move into operational workflows.</p>
+
+          <div class="portalops-context-actions">
+            <% if ((analysisResponse != null) && !analysisResponse.getActionLinks().isEmpty()) { %>
+              <% for (ActionLink actionLink : analysisResponse.getActionLinks()) {
+                   request.setAttribute("PORTALOPS_ACTION_LINK", actionLink);
+              %>
+                <%@ include file="/components/action_card.jspf" %>
+              <% } %>
+            <% } else { %>
+              <% for (PortalOpsDashboardQuickAction quickAction : dashboardData.getQuickActions()) {
+                   javax.portlet.PortletURL quickActionURL = renderResponse.createRenderURL();
+                   quickActionURL.setParameter("screen", quickAction.getScreen());
+                   String quickActionHref = quickActionURL.toString();
+
+                   if (!quickAction.getAnchor().isEmpty()) {
+                       quickActionHref = quickActionHref + "#" + quickAction.getAnchor();
+                   }
+              %>
+                <a class="portalops-action-card card" href="<%= HtmlUtil.escapeAttribute(quickActionHref) %>">
+                  <div class="card-body">
+                    <div class="portalops-metric-label">Action</div>
+                    <div class="portalops-insight-title"><%= HtmlUtil.escape(quickAction.getLabel()) %></div>
+                    <div class="portalops-metric-help">Jump directly into the related PortalOps module.</div>
+                  </div>
+                </a>
+              <% } %>
+            <% } %>
+          </div>
+        </section>
       </div>
     </div>
   </section>
@@ -123,25 +147,37 @@ String assistantCommandInputId =
   (function() {
     var promptInput = document.getElementById('<%= HtmlUtil.escapeJS(assistantInputId) %>');
     var commandInput = document.getElementById('<%= HtmlUtil.escapeJS(assistantCommandInputId) %>');
+    var tabsRoot = document.getElementById('<%= HtmlUtil.escapeJS(contextTabsId) %>');
+
+    if (tabsRoot) {
+      var tabs = tabsRoot.querySelectorAll('[data-tab-target]');
+      var panels = tabsRoot.querySelectorAll('[data-tab-panel]');
+
+      tabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          var target = tab.getAttribute('data-tab-target');
+
+          tabs.forEach(function(item) {
+            var active = item === tab;
+            item.classList.toggle('is-active', active);
+            item.setAttribute('aria-selected', String(active));
+          });
+
+          panels.forEach(function(panel) {
+            var active = panel.getAttribute('data-tab-panel') === target;
+            panel.classList.toggle('is-active', active);
+            panel.hidden = !active;
+          });
+        });
+      });
+    }
 
     if (!promptInput || !commandInput) {
       return;
     }
 
-    var promptButtons = document.querySelectorAll(
-      '[data-portalops-assistant-prompt="<%= HtmlUtil.escapeJS(renderResponse.getNamespace()) %>"]'
-    );
-
     promptInput.addEventListener('input', function() {
       commandInput.value = '';
-    });
-
-    promptButtons.forEach(function(button) {
-      button.addEventListener('click', function() {
-        promptInput.value = button.getAttribute('data-prompt') || '';
-        commandInput.value = button.getAttribute('data-command') || '';
-        promptInput.focus();
-      });
     });
   })();
 </script>
