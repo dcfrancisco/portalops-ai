@@ -1,9 +1,9 @@
 package com.portalops.agent.user.skill;
 
-public interface Skill {
+import com.portalops.api.runtime.PortalOpsSkill;
+
+public interface Skill extends PortalOpsSkill {
 
 	public Object execute();
-
-	public String getName();
 
 }

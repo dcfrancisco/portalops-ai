@@ -8,6 +8,7 @@ Export-Package: \
 	com.portalops.api.knowledge,\
 	com.portalops.api.permissions,\
 	com.portalops.api.policy,\
+	com.portalops.api.runtime,\
 	com.portalops.api.service,\
 	com.portalops.api.site,\
 	com.portalops.api.workflow

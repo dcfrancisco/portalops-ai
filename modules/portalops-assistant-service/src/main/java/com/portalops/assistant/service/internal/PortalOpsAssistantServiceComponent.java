@@ -9,6 +9,8 @@ import com.portalops.ai.api.AIProviderType;
 import com.portalops.ai.api.AIRequest;
 import com.portalops.ai.api.AIResponse;
 import com.portalops.assistant.api.AssistantStatus;
+import com.portalops.assistant.api.PortalOpsContextProvider;
+import com.portalops.assistant.api.PortalOpsExecutionMetadata;
 import com.portalops.assistant.api.PortalOpsAssistantResponse;
 import com.portalops.assistant.api.PortalOpsAssistantService;
 import com.portalops.assistant.service.internal.configuration.PortalOpsAssistantConfiguration;
@@ -40,6 +42,11 @@ public class PortalOpsAssistantServiceComponent
 
         if (_isUserManagementPrompt(prompt)) {
             AgentResponse agentResponse = _userAgent.execute(prompt);
+            _portalOpsContextProvider.recordExecution(
+                    new PortalOpsExecutionMetadata(
+                            _toExecutionPath(agentResponse),
+                            agentResponse.getFindings(),
+                            agentResponse.getMessage()));
 
             if (_log.isInfoEnabled()) {
                 _log.info("Routed assistant prompt to UserManagementAgent");
@@ -51,7 +58,8 @@ public class PortalOpsAssistantServiceComponent
                     "User Management",
                     agentResponse.getMessage(),
                     List.of(
-                            "Execution path: PortalOps Assistant -> UserManagementAgent -> GetUserCountSkill -> UserCountTool"),
+                            "Execution path: " +
+                                    String.join(" -> ", _toExecutionPath(agentResponse))),
                     agentResponse.isSuccess() ? List.of() :
                             List.of(
                                     "Retry with a user count prompt such as 'How many users are in the portal?'"),
@@ -73,7 +81,10 @@ public class PortalOpsAssistantServiceComponent
         }
 
         AIResponse aiResponse = aiProvider.complete(
-                new AIRequest(prompt, Map.of(), portalOpsRequestContext));
+                new AIRequest(
+                        prompt, Map.of(), portalOpsRequestContext,
+                        _portalOpsContextProvider.buildRuntimeContext(),
+                        _portalOpsContextProvider.getSystemPrompt()));
 
         if (!aiResponse.isSuccess()) {
             return new PortalOpsAssistantResponse<>(
@@ -144,12 +155,24 @@ public class PortalOpsAssistantServiceComponent
                  normalizedPrompt.contains("how many"));
     }
 
+    private List<String> _toExecutionPath(AgentResponse agentResponse) {
+        List<String> executionPath = new java.util.ArrayList<>();
+
+        executionPath.add("PortalOps Assistant");
+        executionPath.addAll(agentResponse.getExecutionPath());
+
+        return executionPath;
+    }
+
     private static final Log _log = LogFactoryUtil.getLog(
             PortalOpsAssistantServiceComponent.class);
 
     private final Map<String, AIProvider> _aiProviders =
             new ConcurrentHashMap<>();
     private volatile String _providerType = AIProviderType.OPENAI.name();
+
+    @Reference
+    private PortalOpsContextProvider _portalOpsContextProvider;
 
     @Reference
     private UserAgent _userAgent;

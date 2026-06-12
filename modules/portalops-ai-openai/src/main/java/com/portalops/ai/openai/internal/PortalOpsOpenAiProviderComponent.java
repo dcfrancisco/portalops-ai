@@ -136,9 +136,16 @@ public class PortalOpsOpenAiProviderComponent implements AIProvider {
         JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
         JSONObject systemJSONObject = JSONFactoryUtil.createJSONObject();
 
-        systemJSONObject.put(
-                "content",
-                "You are PortalOps Assistant. Answer clearly and concisely for Liferay portal administrators.");
+        StringBundler systemPromptSB = new StringBundler();
+
+        systemPromptSB.append(aiRequest.getSystemPrompt());
+
+        if (!aiRequest.getRuntimeContext().isBlank()) {
+            systemPromptSB.append("\n\n");
+            systemPromptSB.append(aiRequest.getRuntimeContext());
+        }
+
+        systemJSONObject.put("content", systemPromptSB.toString());
         systemJSONObject.put("role", "system");
 
         JSONObject userJSONObject = JSONFactoryUtil.createJSONObject();
