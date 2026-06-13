@@ -1233,8 +1233,9 @@ public class PortalOpsPortlet extends MVCPortlet {
                                     "Detected reindex work currently associated with this company."),
                             new FindingCard(
                                     "Last Reindex",
-                                    String.valueOf(
-                                            searchFindingsPayload.getLastReindexDate()),
+                                    _getDisplayValue(
+                                            searchFindingsPayload.getLastReindexDate(),
+                                            "No reindex detected"),
                                     "info",
                                     "Most recent reindex activity detected by PortalOps."));
                 case "search-errors":
@@ -1500,6 +1501,14 @@ public class PortalOpsPortlet extends MVCPortlet {
             default:
                 return "success";
         }
+    }
+
+    private String _getDisplayValue(String value, String fallback) {
+        if ((value == null) || value.isBlank()) {
+            return fallback;
+        }
+
+        return value;
     }
 
     private static final Log _log = LogFactoryUtil.getLog(
