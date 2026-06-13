@@ -1,5 +1,24 @@
 <div class="portalops-sidebar card">
   <div class="card-body p-0">
+    <div class="portalops-sidebar-header">
+      <div class="portalops-sidebar-brand">
+        <span class="portalops-sidebar-brand-icon">
+          <clay:icon symbol="robot" />
+        </span>
+        <span class="portalops-sidebar-brand-label">PortalOps</span>
+      </div>
+
+      <button
+        aria-expanded="true"
+        aria-label="Collapse navigation"
+        class="btn btn-monospaced btn-secondary portalops-sidebar-toggle"
+        data-portalops-toggle="nav"
+        type="button"
+      >
+        <clay:icon symbol="angle-left" />
+      </button>
+    </div>
+
     <div class="list-group list-group-flush">
       <% for (PortalOpsNavigationItem navigationItem : viewData.getNavigationItems()) {
            boolean active = navigationItem.getScreen().equals(viewData.getActiveScreen());

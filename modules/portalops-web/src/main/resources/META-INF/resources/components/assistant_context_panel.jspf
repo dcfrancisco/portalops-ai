@@ -11,105 +11,119 @@ String assistantFormId =
 <div class="portalops-context-shell">
   <section class="card portalops-context-card portalops-context-tabs-card" id="<%= HtmlUtil.escapeAttribute(contextTabsId) %>">
     <div class="card-body portalops-context-tabs-body">
-      <div class="portalops-context-tabs-header" role="tablist" aria-label="PortalOps context tabs">
+      <div class="portalops-context-panel-header">
         <button
-          aria-selected="true"
-          class="portalops-context-tab is-active"
-          data-tab-target="portalops"
-          role="tab"
+          aria-expanded="true"
+          aria-label="Assistant"
+          class="btn btn-monospaced btn-secondary portalops-context-toggle"
+          data-portalops-toggle="context"
           type="button"
         >
-          PortalOps
-        </button>
-        <button
-          aria-selected="false"
-          class="portalops-context-tab"
-          data-tab-target="findings"
-          role="tab"
-          type="button"
-        >
-          Findings
-        </button>
-        <button
-          aria-selected="false"
-          class="portalops-context-tab"
-          data-tab-target="actions"
-          role="tab"
-          type="button"
-        >
-          Actions
+          <clay:icon symbol="chatbot" />
         </button>
       </div>
 
-      <div class="portalops-context-tab-panels">
-        <section class="portalops-context-tab-panel portalops-context-tab-panel-assistant is-active" data-tab-panel="portalops" role="tabpanel">
-          <div class="portalops-context-assistant-response">
-            <% if (assistantResponse != null) { %>
-              <%@ include file="/components/assistant_insight_card.jspf" %>
-            <% } %>
-          </div>
+      <div class="portalops-context-expanded">
+        <div class="portalops-context-tabs-header" role="tablist" aria-label="PortalOps context tabs">
+          <button
+            aria-selected="true"
+            class="portalops-context-tab is-active"
+            data-tab-target="portalops"
+            role="tab"
+            type="button"
+          >
+            PortalOps
+          </button>
+          <button
+            aria-selected="false"
+            class="portalops-context-tab"
+            data-tab-target="findings"
+            role="tab"
+            type="button"
+          >
+            Findings
+          </button>
+          <button
+            aria-selected="false"
+            class="portalops-context-tab"
+            data-tab-target="actions"
+            role="tab"
+            type="button"
+          >
+            Actions
+          </button>
+        </div>
 
-          <portlet:renderURL var="portalOpsAssistantURL">
-            <portlet:param name="screen" value="<%= viewData.getActiveScreen() %>" />
-          </portlet:renderURL>
+        <div class="portalops-context-tab-panels">
+          <section class="portalops-context-tab-panel portalops-context-tab-panel-assistant is-active" data-tab-panel="portalops" role="tabpanel">
+            <div class="portalops-context-assistant-response">
+              <% if (assistantResponse != null) { %>
+                <%@ include file="/components/assistant_insight_card.jspf" %>
+              <% } %>
+            </div>
 
-          <div class="portalops-context-assistant-composer">
-            <form action="<%= portalOpsAssistantURL %>" id="<%= HtmlUtil.escapeAttribute(assistantFormId) %>" method="get">
-              <input name="<portlet:namespace />assistantMode" type="hidden" value="prompt" />
-              <input name="<portlet:namespace />screen" type="hidden" value="<%= HtmlUtil.escapeAttribute(viewData.getActiveScreen()) %>" />
+            <portlet:renderURL var="portalOpsAssistantURL">
+              <portlet:param name="screen" value="<%= viewData.getActiveScreen() %>" />
+            </portlet:renderURL>
 
-              <div class="portalops-assistant-prompt-row portalops-chat-composer-row">
-                <textarea
-                  class="form-control portalops-chat-input"
-                  id="<%= HtmlUtil.escapeAttribute(assistantInputId) %>"
-                  name="<portlet:namespace />assistantPrompt"
-                  placeholder="<%= HtmlUtil.escapeAttribute(assistantData.getPlaceholder()) %>"
-                  rows="1"
-                ><%= HtmlUtil.escape(assistantResponse == null && assistantPromptValue != null ? assistantPromptValue : "") %></textarea>
+            <div class="portalops-context-assistant-composer">
+              <form action="<%= portalOpsAssistantURL %>" id="<%= HtmlUtil.escapeAttribute(assistantFormId) %>" method="get">
+                <input name="<portlet:namespace />assistantMode" type="hidden" value="prompt" />
+                <input name="<portlet:namespace />screen" type="hidden" value="<%= HtmlUtil.escapeAttribute(viewData.getActiveScreen()) %>" />
 
-                <button aria-label="Send prompt" class="btn btn-primary portalops-context-submit" type="submit">
-                  <svg aria-hidden="true" class="portalops-send-icon" viewBox="0 0 16 16">
-                    <path d="M13.78 2.22a.75.75 0 0 0-.77-.18L2.86 5.73a.75.75 0 0 0 .06 1.42l4.12 1.17 1.17 4.12a.75.75 0 0 0 1.42.06l3.69-10.15a.75.75 0 0 0-.18-.77Zm-4.37 8.07-.79-2.77a.75.75 0 0 0-.51-.51l-2.77-.79 6.4-2.33-2.33 6.4Z" fill="currentColor" />
-                  </svg>
-                </button>
-              </div>
-            </form>
-          </div>
-        </section>
+                <div class="portalops-assistant-prompt-row portalops-chat-composer-row">
+                  <textarea
+                    class="form-control portalops-chat-input"
+                    id="<%= HtmlUtil.escapeAttribute(assistantInputId) %>"
+                    name="<portlet:namespace />assistantPrompt"
+                    placeholder="<%= HtmlUtil.escapeAttribute(assistantData.getPlaceholder()) %>"
+                    rows="1"
+                  ><%= HtmlUtil.escape(assistantResponse == null && assistantPromptValue != null ? assistantPromptValue : "") %></textarea>
 
-        <section class="portalops-context-tab-panel portalops-context-tab-panel-scrollable" data-tab-panel="findings" role="tabpanel" hidden>
-          <% if ((analysisResponse != null) && !analysisResponse.getFindingCards().isEmpty()) { %>
-            <dl class="portalops-findings-list">
-              <% for (FindingCard findingCard : analysisResponse.getFindingCards()) { %>
-                <div class="portalops-finding-row">
-                  <dt><%= HtmlUtil.escape(findingCard.getTitle()) %></dt>
-                  <dd><%= HtmlUtil.escape(findingCard.getValue()) %></dd>
+                  <button aria-label="Send prompt" class="btn btn-primary portalops-context-submit" type="submit">
+                    <svg aria-hidden="true" class="portalops-send-icon" viewBox="0 0 16 16">
+                      <path d="M13.78 2.22a.75.75 0 0 0-.77-.18L2.86 5.73a.75.75 0 0 0 .06 1.42l4.12 1.17 1.17 4.12a.75.75 0 0 0 1.42.06l3.69-10.15a.75.75 0 0 0-.18-.77Zm-4.37 8.07-.79-2.77a.75.75 0 0 0-.51-.51l-2.77-.79 6.4-2.33-2.33 6.4Z" fill="currentColor" />
+                    </svg>
+                  </button>
                 </div>
-              <% } %>
-            </dl>
-          <% } %>
-        </section>
+              </form>
+            </div>
+          </section>
 
-        <section class="portalops-context-tab-panel portalops-context-tab-panel-scrollable" data-tab-panel="actions" role="tabpanel" hidden>
-          <div class="portalops-context-actions">
-            <% if ((analysisResponse != null) && !analysisResponse.getRecommendations().isEmpty()) { %>
-              <% for (Recommendation recommendation : analysisResponse.getRecommendations()) { %>
-                <div class="portalops-action-row">
-                  <div class="portalops-insight-title"><%= HtmlUtil.escape(recommendation.getTitle()) %></div>
-                  <div class="portalops-metric-help"><%= HtmlUtil.escape(recommendation.getDescription()) %></div>
-                </div>
-              <% } %>
+          <section class="portalops-context-tab-panel portalops-context-tab-panel-scrollable" data-tab-panel="findings" role="tabpanel" hidden>
+            <% if ((analysisResponse != null) && !analysisResponse.getFindingCards().isEmpty()) { %>
+              <dl class="portalops-findings-list">
+                <% for (FindingCard findingCard : analysisResponse.getFindingCards()) { %>
+                  <div class="portalops-finding-row">
+                    <dt><%= HtmlUtil.escape(findingCard.getTitle()) %></dt>
+                    <dd><%= HtmlUtil.escape(findingCard.getValue()) %></dd>
+                  </div>
+                <% } %>
+              </dl>
             <% } %>
+          </section>
 
-            <% if ((analysisResponse != null) && !analysisResponse.getActionLinks().isEmpty()) { %>
-              <% for (ActionLink actionLink : analysisResponse.getActionLinks()) {
-                   request.setAttribute("PORTALOPS_ACTION_LINK", actionLink);
-              %>
-                <%@ include file="/components/action_card.jspf" %>
+          <section class="portalops-context-tab-panel portalops-context-tab-panel-scrollable" data-tab-panel="actions" role="tabpanel" hidden>
+            <div class="portalops-context-actions">
+              <% if ((analysisResponse != null) && !analysisResponse.getRecommendations().isEmpty()) { %>
+                <% for (Recommendation recommendation : analysisResponse.getRecommendations()) { %>
+                  <div class="portalops-action-row">
+                    <div class="portalops-insight-title"><%= HtmlUtil.escape(recommendation.getTitle()) %></div>
+                    <div class="portalops-metric-help"><%= HtmlUtil.escape(recommendation.getDescription()) %></div>
+                  </div>
+                <% } %>
               <% } %>
-            <% } %>
-          </div>
-        </section>
+
+              <% if ((analysisResponse != null) && !analysisResponse.getActionLinks().isEmpty()) { %>
+                <% for (ActionLink actionLink : analysisResponse.getActionLinks()) {
+                     request.setAttribute("PORTALOPS_ACTION_LINK", actionLink);
+                %>
+                  <%@ include file="/components/action_card.jspf" %>
+                <% } %>
+              <% } %>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   </section>
