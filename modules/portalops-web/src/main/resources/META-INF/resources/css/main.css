@@ -576,6 +576,12 @@
   resize: none;
 }
 
+.portalops-send-icon {
+  display: block;
+  height: 1rem;
+  width: 1rem;
+}
+
 .portalops-chat-input.form-control:focus {
   box-shadow: none;
 }

@@ -68,7 +68,9 @@ String assistantFormId =
                 ><%= HtmlUtil.escape(assistantResponse == null && assistantPromptValue != null ? assistantPromptValue : "") %></textarea>
 
                 <button aria-label="Send prompt" class="btn btn-primary portalops-context-submit" type="submit">
-                  <span aria-hidden="true">↑</span>
+                  <svg aria-hidden="true" class="portalops-send-icon" viewBox="0 0 16 16">
+                    <path d="M13.78 2.22a.75.75 0 0 0-.77-.18L2.86 5.73a.75.75 0 0 0 .06 1.42l4.12 1.17 1.17 4.12a.75.75 0 0 0 1.42.06l3.69-10.15a.75.75 0 0 0-.18-.77Zm-4.37 8.07-.79-2.77a.75.75 0 0 0-.51-.51l-2.77-.79 6.4-2.33-2.33 6.4Z" fill="currentColor" />
+                  </svg>
                 </button>
               </div>
             </form>
