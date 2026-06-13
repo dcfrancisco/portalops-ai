@@ -34,8 +34,15 @@
 | --- | --- | --- | --- |
 | Site Count | SiteManagementAgent | GetSites | Implemented |
 | List Sites | SiteManagementAgent | GetSites | Implemented |
-| Site Membership | SiteManagementAgent | GetSiteMembership | Implemented |
-| Site Activity | SiteManagementAgent | GetSiteActivity | Implemented |
+| Site Summary | SiteManagementAgent | GetSites | Implemented |
+| Page Counts | SiteManagementAgent | GetSites | Implemented |
+| List Pages by Site | SiteManagementAgent | GetSites | Implemented |
+| List Site and Page Names | SiteManagementAgent | GetSites | Implemented |
+| Site Activity | SiteManagementAgent | GetSites | Implemented |
+| Page Details | SiteManagementAgent | GetSites | Planned |
+| Page Hierarchy Analysis | SiteManagementAgent | GetSites | Planned |
+| Sites Without Pages | SiteManagementAgent | GetSites | Planned |
+| Site Membership Analysis | SiteManagementAgent | GetSites | Planned |
 
 ---
 
@@ -43,9 +50,9 @@
 
 | Capability | Agent | Skill | Status |
 | --- | --- | --- | --- |
-| Search Health | SearchManagementAgent | GetSearchHealth | Planned |
-| Reindex Status | SearchManagementAgent | GetReindexStatus | Planned |
-| Search Errors | SearchManagementAgent | GetSearchErrors | Planned |
+| Search Health | SearchManagementAgent | GetSearchHealth | Implemented |
+| Reindex Status | SearchManagementAgent | GetReindexStatus | Implemented |
+| Search Errors | SearchManagementAgent | GetSearchErrors | Implemented |
 
 ---
 
@@ -72,10 +79,11 @@
 
 | Capability | Agent | Skill | Status |
 | --- | --- | --- | --- |
-| List Agents | PortalOpsManagementAgent | ListAgents | Planned |
-| List Skills | PortalOpsManagementAgent | ListSkills | Planned |
-| List Capabilities | PortalOpsManagementAgent | ListCapabilities | Planned |
-| Describe Capability | PortalOpsManagementAgent | DescribeCapability | Planned |
+| List Agents | PortalOpsManagementAgent | ListAgents | Implemented |
+| List Skills | PortalOpsManagementAgent | ListSkills | Implemented |
+| List Capabilities | PortalOpsManagementAgent | ListCapabilities | Implemented |
+| Describe Capability | PortalOpsManagementAgent | DescribeCapability | Implemented |
+| List Domains | PortalOpsManagementAgent | ListDomains | Implemented |
 
 ---
 
@@ -85,7 +93,7 @@
 | --- | --- |
 | User Insights | Implemented |
 | Site Insights | Implemented |
-| Search Insights | Planned |
+| Search Insights | Implemented |
 | Content Insights | Implemented |
 
 ---

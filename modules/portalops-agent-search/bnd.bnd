@@ -1,0 +1,6 @@
+Bundle-Name: PortalOps Agent Search
+Bundle-SymbolicName: com.portalops.agent.search
+Bundle-Version: 1.0.0
+Export-Package:\
+	com.portalops.agent.search.agent,\
+	com.portalops.agent.search.dto

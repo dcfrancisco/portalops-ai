@@ -27,3 +27,9 @@
 test-results
 .env
 .gradle-home
+
+# macOS
+# Finder metadata
+.DS_Store
+.AppleDouble
+.LSOverride

@@ -1,0 +1,6 @@
+Bundle-Name: PortalOps Agent Content
+Bundle-SymbolicName: com.portalops.agent.content
+Bundle-Version: 1.0.0
+Export-Package:\
+	com.portalops.agent.content.agent,\
+	com.portalops.agent.content.dto
