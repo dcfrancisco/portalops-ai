@@ -1,31 +1,12 @@
 <%@ include file="/init.jsp" %>
 
 <div class="portalops-dashboard-shell">
-  <% for (PortalOpsDashboardSection section : dashboardData.getSections()) { %>
-    <section class="portalops-dashboard-section" id="<%= HtmlUtil.escapeAttribute(section.getId()) %>">
-      <div class="portalops-dashboard-section-header">
-        <div>
-          <div class="portalops-section-title"><%= HtmlUtil.escape(section.getTitle()) %></div>
-          <p class="portalops-section-subtitle"><%= HtmlUtil.escape(section.getDescription()) %></p>
-        </div>
-      </div>
-
-      <div class="portalops-grid portalops-grid-dashboard">
-        <% for (PortalOpsDashboardCard card : section.getCards()) {
-             request.setAttribute("PORTALOPS_DASHBOARD_CARD", card);
-        %>
-          <%@ include file="/components/dashboard_card.jspf" %>
-        <% } %>
-      </div>
-    </section>
-  <% } %>
-
-  <div class="portalops-grid portalops-grid-secondary portalops-grid-secondary-dashboard">
+  <% if (!dashboardData.getInsights().isEmpty()) { %>
     <section class="card portalops-insights-panel">
       <div class="card-body">
         <div class="portalops-insights-header">
           <div>
-            <div class="portalops-section-title">Findings</div>
+            <div class="portalops-section-title">Insights</div>
             <p class="portalops-section-subtitle">Operational findings that may need follow-up in the workbench.</p>
           </div>
         </div>
@@ -56,7 +37,28 @@
         </div>
       </div>
     </section>
+  <% } %>
 
+  <% for (PortalOpsDashboardSection section : dashboardData.getSections()) { %>
+    <section class="portalops-dashboard-section" id="<%= HtmlUtil.escapeAttribute(section.getId()) %>">
+      <div class="portalops-dashboard-section-header">
+        <div>
+          <div class="portalops-section-title"><%= HtmlUtil.escape(section.getTitle()) %></div>
+          <p class="portalops-section-subtitle"><%= HtmlUtil.escape(section.getDescription()) %></p>
+        </div>
+      </div>
+
+      <div class="portalops-grid portalops-grid-dashboard">
+        <% for (PortalOpsDashboardCard card : section.getCards()) {
+             request.setAttribute("PORTALOPS_DASHBOARD_CARD", card);
+        %>
+          <%@ include file="/components/dashboard_card.jspf" %>
+        <% } %>
+      </div>
+    </section>
+  <% } %>
+
+  <div class="portalops-grid portalops-grid-secondary portalops-grid-secondary-dashboard">
     <section class="card portalops-actions-panel">
       <div class="card-body">
         <div class="portalops-section-title">Actions</div>
