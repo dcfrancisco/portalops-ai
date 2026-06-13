@@ -1,9 +1,17 @@
 <%
 PortalOpsAssistantInsight assistantInsight = assistantData.getInsight();
+boolean hasAssistantTurns =
+    (assistantTurns != null) && !assistantTurns.isEmpty();
+boolean hasAssistantResponse = assistantResponse != null;
+boolean hasInsights =
+    (assistantInsight != null) &&
+    (!assistantInsight.getFindings().isEmpty() ||
+     !assistantInsight.getRecommendations().isEmpty());
 %>
 
-<section class="portalops-assistant-insight">
-  <% if ((assistantTurns != null) && !assistantTurns.isEmpty()) { %>
+<% if (hasAssistantTurns || hasAssistantResponse || hasInsights) { %>
+  <section class="portalops-assistant-insight">
+  <% if (hasAssistantTurns) { %>
     <% for (PortalOpsAssistantConversationTurn assistantTurn : assistantTurns) {
          request.setAttribute(
              "PORTALOPS_ASSISTANT_TURN_PROMPT", assistantTurn.getPrompt());
@@ -13,18 +21,12 @@ PortalOpsAssistantInsight assistantInsight = assistantData.getInsight();
     %>
       <%@ include file="/components/assistant_turn.jspf" %>
     <% } %>
-  <% } else if (assistantResponse != null) { %>
+  <% } else if (hasAssistantResponse) { %>
     <%
     request.setAttribute("PORTALOPS_ASSISTANT_TURN_PROMPT", assistantPromptValue);
     request.setAttribute("PORTALOPS_ASSISTANT_TURN_RESPONSE", assistantResponse);
     %>
     <%@ include file="/components/assistant_turn.jspf" %>
-  <% } else { %>
-    <div class="portalops-chat-empty">
-      <div>
-        <div class="portalops-chat-empty-title">Ask PortalOps</div>
-        <p>Explore users, operational findings, and available PortalOps capabilities.</p>
-      </div>
-    </div>
   <% } %>
-</section>
+  </section>
+<% } %>

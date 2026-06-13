@@ -87,8 +87,6 @@ String assistantFormId =
                 </div>
               <% } %>
             </dl>
-          <% } else { %>
-            <p class="portalops-context-empty">No operational findings are available for this conversation.</p>
           <% } %>
         </section>
 
@@ -109,12 +107,6 @@ String assistantFormId =
               %>
                 <%@ include file="/components/action_card.jspf" %>
               <% } %>
-            <% } %>
-
-            <% if ((analysisResponse == null) ||
-                    (analysisResponse.getRecommendations().isEmpty() &&
-                     analysisResponse.getActionLinks().isEmpty())) { %>
-              <p class="portalops-context-empty">No recommended actions are available.</p>
             <% } %>
           </div>
         </section>

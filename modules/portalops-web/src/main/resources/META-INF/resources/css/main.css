@@ -538,6 +538,7 @@
 .portalops-chat-message {
   display: flex;
   min-width: 0;
+  width: 100%;
 }
 
 .portalops-chat-message-assistant {
@@ -546,19 +547,19 @@
 }
 
 .portalops-chat-message-user {
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
-
 .portalops-chat-user-bubble {
   background: #eaf1ff;
   border: 1px solid #d4e1fb;
   border-radius: 0.8rem 0.8rem 0.2rem 0.8rem;
   color: #17233b;
   line-height: 1.45;
-  max-width: min(82%, 32rem);
+  max-width: none;
   overflow-wrap: break-word;
   padding: 0.55rem 0.75rem;
   white-space: pre-wrap;
+  width: 100%;
 }
 
 .portalops-chat-composer-row:focus-within {

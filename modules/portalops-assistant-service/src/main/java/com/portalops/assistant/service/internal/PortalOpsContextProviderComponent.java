@@ -1,5 +1,7 @@
 package com.portalops.assistant.service.internal;
 
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.petra.string.StringBundler;
 
 import com.portalops.api.runtime.PortalOpsAgent;
@@ -15,7 +17,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import java.nio.charset.StandardCharsets;
+
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -66,16 +74,12 @@ public class PortalOpsContextProviderComponent implements PortalOpsContextProvid
 
 	@Override
 	public String getSystemPrompt() {
-		return StringBundler.concat(
-			"You are PortalOps Assistant.\n\n",
-			"PortalOps is an AI operations platform for Liferay.\n\n",
-			"Always prefer PortalOps runtime metadata over general Liferay knowledge.\n\n",
-			"When users refer to agents, skills, tools, capabilities, findings, recommendations, execution paths, or PortalOps functionality, assume they are referring to PortalOps concepts unless explicitly stated otherwise.\n\n",
-			"PortalOps runtime metadata is authoritative.\n\n",
-			"Do not invent PortalOps Agents, Skills, or Tools.\n\n",
-			"If PortalOps does not support a capability, clearly state that the capability is not currently implemented.\n\n",
-			"When runtime metadata is available, use it before relying on general Liferay knowledge.\n\n",
-			"When current execution data is provided, answer the user's request from that data. Explain, summarize, interpret, or recommend as appropriate, while distinguishing facts from observations.");
+		return _systemPrompt;
+	}
+
+	@Activate
+	protected void activate() {
+		_systemPrompt = _loadSystemPrompt();
 	}
 
 	private void _appendAgents(StringBundler sb) {
@@ -183,6 +187,29 @@ public class PortalOpsContextProviderComponent implements PortalOpsContextProvid
 		return collection;
 	}
 
+	private String _loadSystemPrompt() {
+		try (InputStream inputStream =
+				getClass().getClassLoader().getResourceAsStream(
+					"prompts/portalops-system-prompt.md")) {
+
+			if (inputStream == null) {
+				_log.error("Unable to load PortalOps system prompt resource");
+
+				return "";
+			}
+
+			return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8).
+				trim();
+		}
+		catch (IOException ioException) {
+			_log.error(
+				"Unable to read PortalOps system prompt resource",
+				ioException);
+
+			return "";
+		}
+	}
+
 	@Reference(
 		cardinality = ReferenceCardinality.MULTIPLE,
 		policy = ReferencePolicy.DYNAMIC
@@ -200,5 +227,10 @@ public class PortalOpsContextProviderComponent implements PortalOpsContextProvid
 		policy = ReferencePolicy.DYNAMIC
 	)
 	private volatile Collection<PortalOpsTool> _portalOpsTools;
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		PortalOpsContextProviderComponent.class);
+
+	private volatile String _systemPrompt = "";
 
 }
