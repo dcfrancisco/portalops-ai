@@ -7,7 +7,6 @@ import com.portalops.web.internal.display.PortalOpsAssistantData;
 import com.portalops.web.internal.display.PortalOpsAssistantInsight;
 import com.portalops.web.internal.display.PortalOpsDashboardCard;
 import com.portalops.web.internal.display.PortalOpsDashboardData;
-import com.portalops.web.internal.display.PortalOpsDashboardInsight;
 import com.portalops.web.internal.display.PortalOpsDashboardQuickAction;
 import com.portalops.web.internal.display.PortalOpsDashboardSection;
 
@@ -154,32 +153,7 @@ public class PortalOpsMockDashboardDataProviderComponent
                                                 "Needs investigation",
                                                 "Known operational issues remain unresolved or unassigned.",
                                                 DataSourceType.COMING_SOON)))),
-                List.of(
-                        new PortalOpsDashboardInsight(
-                                "Expiring content needs review",
-                                "Expired and stale content continue to require editorial cleanup.",
-                                "warning", "Review Expiring Content", "content",
-                                "content-intelligence"),
-                        new PortalOpsDashboardInsight(
-                                "Permission review is a current governance need",
-                                "Risky permissions are present and should be validated against policy expectations.",
-                                "warning", "Review Permission Risks", "dashboard",
-                                "governance-audit"),
-                        new PortalOpsDashboardInsight(
-                                "Open findings should be triaged",
-                                "PortalOps has accumulated multiple open findings that need prioritization.",
-                                "critical", "Show Open Findings", "dashboard",
-                                "operations"),
-                        new PortalOpsDashboardInsight(
-                                "A recurring job is failing",
-                                "One scheduled job has failed repeatedly and should be investigated.",
-                                "critical", "Review Scheduled Jobs", "workflow",
-                                ""),
-                        new PortalOpsDashboardInsight(
-                                "Knowledge gaps are emerging",
-                                "Several operational runbooks require review before the next escalation cycle.",
-                                "warning", "Open Knowledge Assistant", "knowledge",
-                                "knowledge")),
+                null,
                 List.of(
                         new PortalOpsDashboardQuickAction(
                                 "Show Open Findings", "warning-full", "dashboard",

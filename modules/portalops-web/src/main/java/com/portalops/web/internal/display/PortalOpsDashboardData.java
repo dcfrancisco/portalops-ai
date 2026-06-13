@@ -10,13 +10,13 @@ public class PortalOpsDashboardData implements Serializable {
 
     public PortalOpsDashboardData(
             String headline, String summary, List<PortalOpsDashboardSection> sections,
-            List<PortalOpsDashboardInsight> insights,
+            PortalOpsDashboardSection insightsSection,
             List<PortalOpsDashboardQuickAction> quickActions,
             PortalOpsAssistantData assistantData) {
 
         _assistantData = Objects.requireNonNull(assistantData);
         _headline = Objects.requireNonNull(headline);
-        _insights = Collections.unmodifiableList(new ArrayList<>(insights));
+        _insightsSection = insightsSection;
         _quickActions = Collections.unmodifiableList(
                 new ArrayList<>(quickActions));
         _sections = Collections.unmodifiableList(new ArrayList<>(sections));
@@ -31,8 +31,8 @@ public class PortalOpsDashboardData implements Serializable {
         return _headline;
     }
 
-    public List<PortalOpsDashboardInsight> getInsights() {
-        return _insights;
+    public PortalOpsDashboardSection getInsightsSection() {
+        return _insightsSection;
     }
 
     public List<PortalOpsDashboardQuickAction> getQuickActions() {
@@ -47,9 +47,17 @@ public class PortalOpsDashboardData implements Serializable {
         return _summary;
     }
 
+    public PortalOpsDashboardData withInsightsSection(
+            PortalOpsDashboardSection insightsSection) {
+
+        return new PortalOpsDashboardData(
+                _headline, _summary, _sections, insightsSection, _quickActions,
+                _assistantData);
+    }
+
     private final PortalOpsAssistantData _assistantData;
     private final String _headline;
-    private final List<PortalOpsDashboardInsight> _insights;
+    private final PortalOpsDashboardSection _insightsSection;
     private final List<PortalOpsDashboardQuickAction> _quickActions;
     private final List<PortalOpsDashboardSection> _sections;
     private final String _summary;
