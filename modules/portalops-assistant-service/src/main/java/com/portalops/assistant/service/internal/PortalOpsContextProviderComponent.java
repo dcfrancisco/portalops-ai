@@ -14,7 +14,6 @@ import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -25,7 +24,9 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 public class PortalOpsContextProviderComponent implements PortalOpsContextProvider {
 
 	@Override
-	public String buildRuntimeContext() {
+	public String buildRuntimeContext(
+		PortalOpsExecutionMetadata portalOpsExecutionMetadata) {
+
 		StringBundler sb = new StringBundler();
 
 		sb.append("PortalOps runtime metadata is available.\n\n");
@@ -38,11 +39,8 @@ public class PortalOpsContextProviderComponent implements PortalOpsContextProvid
 		sb.append("\nCurrent Capabilities:\n");
 		_appendCapabilities(sb);
 
-		PortalOpsExecutionMetadata portalOpsExecutionMetadata =
-			_lastExecutionMetadata.get();
-
 		if (portalOpsExecutionMetadata != null) {
-			sb.append("\nMost Recent PortalOps Execution:\n");
+			sb.append("\nCurrent PortalOps Execution:\n");
 			sb.append("Execution Path:\n");
 
 			for (String executionPathStep :
@@ -53,16 +51,13 @@ public class PortalOpsContextProviderComponent implements PortalOpsContextProvid
 				sb.append("\n");
 			}
 
-			sb.append("Findings:\n");
-
-			for (String finding : portalOpsExecutionMetadata.getFindings()) {
-				sb.append("* ");
-				sb.append(finding);
-				sb.append("\n");
-			}
-
-			sb.append("Summary: ");
-			sb.append(portalOpsExecutionMetadata.getSummary());
+			sb.append("Structured Findings Data:\n");
+			sb.append("```json\n");
+			sb.append(portalOpsExecutionMetadata.getDataJSON());
+			sb.append("\n```\n");
+			sb.append(
+				"Use these findings to answer the user's current request. " +
+					"Do not invent values that are not present in the data.");
 			sb.append("\n");
 		}
 
@@ -79,14 +74,8 @@ public class PortalOpsContextProviderComponent implements PortalOpsContextProvid
 			"PortalOps runtime metadata is authoritative.\n\n",
 			"Do not invent PortalOps Agents, Skills, or Tools.\n\n",
 			"If PortalOps does not support a capability, clearly state that the capability is not currently implemented.\n\n",
-			"When runtime metadata is available, use it before relying on general Liferay knowledge.");
-	}
-
-	@Override
-	public void recordExecution(
-		PortalOpsExecutionMetadata portalOpsExecutionMetadata) {
-
-		_lastExecutionMetadata.set(portalOpsExecutionMetadata);
+			"When runtime metadata is available, use it before relying on general Liferay knowledge.\n\n",
+			"When current execution data is provided, answer the user's request from that data. Explain, summarize, interpret, or recommend as appropriate, while distinguishing facts from observations.");
 	}
 
 	private void _appendAgents(StringBundler sb) {
@@ -193,9 +182,6 @@ public class PortalOpsContextProviderComponent implements PortalOpsContextProvid
 
 		return collection;
 	}
-
-	private final AtomicReference<PortalOpsExecutionMetadata>
-		_lastExecutionMetadata = new AtomicReference<>();
 
 	@Reference(
 		cardinality = ReferenceCardinality.MULTIPLE,

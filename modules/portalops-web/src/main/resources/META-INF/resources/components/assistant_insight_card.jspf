@@ -20,29 +20,11 @@ PortalOpsAssistantInsight assistantInsight = assistantData.getInsight();
     %>
     <%@ include file="/components/assistant_turn.jspf" %>
   <% } else { %>
-    <div class="portalops-assistant-status">
-      <span class="portalops-metric-label"><%= HtmlUtil.escape(assistantInsight.getTitle()) %></span>
-      <span class="portalops-status-badge portalops-status-badge-neutral">
-        <%= HtmlUtil.escape(assistantInsight.getStatus()) %>
-      </span>
-    </div>
-
-    <div class="portalops-assistant-list-block">
-      <div class="portalops-metric-label">Findings</div>
-      <ul class="portalops-list portalops-assistant-list">
-        <% for (String finding : assistantInsight.getFindings()) { %>
-          <li><%= HtmlUtil.escape(finding) %></li>
-        <% } %>
-      </ul>
-    </div>
-
-    <div class="portalops-assistant-list-block">
-      <div class="portalops-metric-label">Recommendations</div>
-      <ul class="portalops-list portalops-assistant-list">
-        <% for (String recommendation : assistantInsight.getRecommendations()) { %>
-          <li><%= HtmlUtil.escape(recommendation) %></li>
-        <% } %>
-      </ul>
+    <div class="portalops-chat-empty">
+      <div>
+        <div class="portalops-chat-empty-title">Ask PortalOps</div>
+        <p>Explore users, operational findings, and available PortalOps capabilities.</p>
+      </div>
     </div>
   <% } %>
 </section>

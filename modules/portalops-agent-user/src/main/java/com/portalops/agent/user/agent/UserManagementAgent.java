@@ -5,13 +5,12 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 
 import com.portalops.agent.user.dto.AgentRequest;
 import com.portalops.agent.user.dto.AgentResponse;
-import com.portalops.agent.user.skill.GetUserCountSkill;
+import com.portalops.agent.user.skill.GetUsersSkill;
 import com.portalops.agent.user.skill.Skill;
 import com.portalops.api.runtime.PortalOpsAgent;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -25,47 +24,53 @@ public class UserManagementAgent implements UserAgent {
 	public AgentResponse execute(String prompt) {
 		AgentRequest agentRequest = new AgentRequest(prompt);
 
-		if (_isActiveUserRequest(agentRequest)) {
-			return new AgentResponse(
-				false,
-				"PortalOps currently supports user count retrieval only. Active user reporting has not yet been implemented.");
+		if (agentRequest.getPrompt(
+			).isBlank()) {
+
+			return AgentResponse.failure("EMPTY_USER_REQUEST");
 		}
 
-		if (_isGetUserCountRequest(agentRequest)) {
-			Skill skill = _getSkill(GetUserCountSkill.NAME);
+		Skill skill = _getSkill(GetUsersSkill.NAME);
 
-			if (skill == null) {
-				_log.error(
-					"Unable to execute user count request because the skill is unavailable");
-
-				return new AgentResponse(
-					false,
-					"PortalOps could not load the Get User Count skill.");
-			}
-
-			Object result = skill.execute();
-
-			if (result instanceof AgentResponse) {
-				return (AgentResponse)result;
-			}
-
+		if (skill == null) {
 			_log.error(
-				"Skill " + skill.getName() +
-					" returned an unsupported response type");
+				"Unable to execute user request because GetUsers is " +
+					"unavailable");
 
-			return new AgentResponse(
-				false,
-				"PortalOps received an invalid response from the Get User Count skill.");
+			return AgentResponse.failure("USER_SKILL_UNAVAILABLE");
 		}
 
-		return new AgentResponse(
-			false,
-			"User Management Agent currently supports only user count requests.");
+		Object result;
+
+		try {
+			result = skill.execute();
+		}
+		catch (SecurityException securityException) {
+			_log.warn("User data access was denied", securityException);
+
+			return AgentResponse.failure("USER_ACCESS_DENIED");
+		}
+		catch (RuntimeException runtimeException) {
+			_log.error("Unable to collect user data", runtimeException);
+
+			return AgentResponse.failure("USER_DATA_COLLECTION_FAILED");
+		}
+
+		if (result instanceof AgentResponse) {
+			return (AgentResponse)result;
+		}
+
+		_log.error(
+			"Skill " + skill.getName() +
+				" returned an unsupported response type");
+
+		return AgentResponse.failure("INVALID_SKILL_RESPONSE");
 	}
 
 	@Override
 	public List<String> getCapabilities() {
-		return List.of("User count retrieval for the current portal instance");
+		return List.of(
+			"Retrieve and analyze users in the current portal instance");
 	}
 
 	@Override
@@ -80,7 +85,7 @@ public class UserManagementAgent implements UserAgent {
 
 	@Override
 	public List<String> getSupportedSkills() {
-		return List.of(GetUserCountSkill.NAME);
+		return List.of(GetUsersSkill.NAME);
 	}
 
 	private Skill _getSkill(String name) {
@@ -91,24 +96,6 @@ public class UserManagementAgent implements UserAgent {
 		}
 
 		return null;
-	}
-
-	private boolean _isGetUserCountRequest(AgentRequest agentRequest) {
-		String normalizedPrompt = agentRequest.getPrompt().toLowerCase(
-			Locale.ROOT);
-
-		return normalizedPrompt.contains("how many users") ||
-			normalizedPrompt.contains("user count") ||
-			(normalizedPrompt.contains("count") &&
-			 normalizedPrompt.contains("user"));
-	}
-
-	private boolean _isActiveUserRequest(AgentRequest agentRequest) {
-		String normalizedPrompt = agentRequest.getPrompt().toLowerCase(
-			Locale.ROOT);
-
-		return normalizedPrompt.contains("active") &&
-			normalizedPrompt.contains("user");
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

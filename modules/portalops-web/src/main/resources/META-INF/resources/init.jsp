@@ -18,6 +18,7 @@
 <%@ page import="com.portalops.assistant.api.payload.StaleContentItem" %>
 <%@ page import="com.portalops.assistant.api.payload.StaleContentPayload" %>
 <%@ page import="com.portalops.assistant.api.payload.SystemHealthPayload" %>
+<%@ page import="com.portalops.assistant.api.payload.UserFindingsPayload" %>
 <%@ page import="com.portalops.web.internal.display.PortalOpsAssistantData" %>
 <%@ page import="com.portalops.web.internal.display.PortalOpsAssistantConversationTurn" %>
 <%@ page import="com.portalops.web.internal.display.PortalOpsAssistantInsight" %>

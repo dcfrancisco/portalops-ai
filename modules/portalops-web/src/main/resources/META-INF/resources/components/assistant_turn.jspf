@@ -7,42 +7,13 @@ PortalOpsAssistantResponse<? extends AssistantPayload> assistantTurnResponse =
 %>
 
 <section class="portalops-assistant-turn">
-  <div class="portalops-assistant-prompt-bubble">
-    <span class="portalops-metric-label">Prompt</span>
-    <div class="portalops-assistant-prompt-copy"><%= HtmlUtil.escape(assistantTurnPrompt) %></div>
+  <div class="portalops-chat-message portalops-chat-message-user">
+    <div class="portalops-chat-user-bubble"><%= HtmlUtil.escape(assistantTurnPrompt) %></div>
   </div>
 
-  <div class="alert alert-<%= (assistantTurnResponse.getStatus() == AssistantStatus.ERROR) ? "danger" : ((assistantTurnResponse.getStatus() == AssistantStatus.WARNING) ? "warning" : "info") %> portalops-assistant-alert" role="alert">
-    <strong><%= HtmlUtil.escape(assistantTurnResponse.getTitle()) %></strong>
-    <div class="portalops-assistant-response-copy"><%= HtmlUtil.escape(assistantTurnResponse.getSummary()) %></div>
-  </div>
-
-  <div class="portalops-assistant-list-block">
-    <div class="portalops-metric-label">Findings</div>
-    <ul class="portalops-list portalops-assistant-list">
-      <% for (String finding : assistantTurnResponse.getFindings()) { %>
-        <li><%= HtmlUtil.escape(finding) %></li>
-      <% } %>
-    </ul>
-  </div>
-
-  <div class="portalops-assistant-list-block">
-    <div class="portalops-metric-label">Recommendations</div>
-    <ul class="portalops-list portalops-assistant-list">
-      <% for (String recommendation : assistantTurnResponse.getRecommendations()) { %>
-        <li><%= HtmlUtil.escape(recommendation) %></li>
-      <% } %>
-    </ul>
-  </div>
-
-  <% if (!assistantTurnResponse.getActions().isEmpty()) { %>
-    <div class="portalops-assistant-list-block">
-      <div class="portalops-metric-label">Actions</div>
-      <div class="portalops-assistant-action-list">
-        <% for (AssistantAction assistantAction : assistantTurnResponse.getActions()) { %>
-          <span class="btn btn-secondary btn-sm disabled"><%= HtmlUtil.escape(assistantAction.getLabel()) %></span>
-        <% } %>
-      </div>
+  <div class="portalops-chat-message portalops-chat-message-assistant">
+    <div class="portalops-assistant-response-copy portalops-assistant-response-<%= assistantTurnResponse.getStatus().name().toLowerCase() %>">
+      <%= HtmlUtil.escape(assistantTurnResponse.getSummary()) %>
     </div>
-  <% } %>
+  </div>
 </section>

@@ -124,7 +124,8 @@ flowchart TD
 
 ## Agent Skill Tool Flow
 
-PortalOps uses a layered execution model for operational capabilities:
+PortalOps uses a layered execution model that separates operational data
+collection from response generation:
 
 ```text
 PortalOps Assistant
@@ -136,6 +137,12 @@ Skill
 Tool
     ↓
 Liferay API / Service
+    ↓
+Structured Data
+    ↓
+OpenAI
+    ↓
+Response
 ```
 
 The first MVP vertical slice is user management:
@@ -145,24 +152,50 @@ PortalOps Assistant
     ↓
 UserManagementAgent
     ↓
-GetUserCountSkill
+GetUsersSkill
     ↓
-UserCountTool
+GetUsersTool
     ↓
-UserLocalService.getUsersCount()
+UserLocalService.getCompanyUsers(...)
+    ↓
+Structured User Findings
+    ↓
+OpenAI
+    ↓
+User-Facing Response
 ```
 
-Prompt example:
+The user tool collects company-scoped operational facts including user identity,
+status, account dates, roles, organizations, and user groups. Skills and agents
+return this data as structured payloads; they do not generate the final English
+response.
 
-```text
-How many users are in the portal?
+Example structured result:
+
+```json
+{
+  "companyId": 12345,
+  "totalUsers": 1,
+  "users": [
+    {
+      "userId": 20123,
+      "fullName": "Test Test",
+      "emailAddress": "test@liferay.com",
+      "status": "approved",
+      "createDate": "2026-06-12T13:00:00Z",
+      "lastLoginDate": null,
+      "roles": ["Administrator"],
+      "organizations": [],
+      "userGroups": []
+    }
+  ]
+}
 ```
 
-Response example:
-
-```text
-There are 1245 users in the portal.
-```
+OpenAI receives the original user prompt, registered PortalOps runtime metadata,
+the execution path, and the structured findings. It is responsible for
+explaining, summarizing, interpreting, and recommending actions from those
+facts.
 
 ## Modular Liferay Direction
 

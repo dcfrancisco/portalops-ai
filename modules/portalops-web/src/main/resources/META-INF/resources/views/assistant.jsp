@@ -14,15 +14,8 @@ String assistantPageLoadingId =
   <portlet:param name="screen" value="assistant" />
 </portlet:renderURL>
 
-<section class="card portalops-assistant-page">
-  <div class="card-body portalops-assistant-page-body">
-    <header class="portalops-assistant-page-header">
-      <div class="portalops-section-title">PortalOps Assistant</div>
-      <p class="portalops-section-subtitle">
-        Prompt your configured AI provider directly from PortalOps. The conversation expands to the full work area so longer responses stay readable.
-      </p>
-    </header>
-
+<section class="portalops-assistant-page">
+  <div class="portalops-assistant-page-body">
     <div class="portalops-assistant-conversation" id="<portlet:namespace />portalOpsAssistantConversation">
       <%@ include file="/components/assistant_insight_card.jspf" %>
     </div>
@@ -32,18 +25,17 @@ String assistantPageLoadingId =
         <input name="<portlet:namespace />assistantMode" type="hidden" value="prompt" />
         <input name="<portlet:namespace />screen" type="hidden" value="assistant" />
 
-        <div class="portalops-assistant-prompt-row">
-          <input
-            class="form-control"
+        <div class="portalops-assistant-prompt-row portalops-chat-composer-row">
+          <textarea
+            class="form-control portalops-chat-input"
             id="<%= HtmlUtil.escapeAttribute(assistantPageInputId) %>"
             name="<portlet:namespace />assistantPrompt"
             placeholder="<%= HtmlUtil.escapeAttribute(assistantData.getPlaceholder()) %>"
-            type="text"
-            value="<%= HtmlUtil.escapeAttribute(assistantPromptValue == null ? "" : assistantPromptValue) %>"
-          />
+            rows="1"
+          ><%= HtmlUtil.escape(assistantResponse == null && assistantPromptValue != null ? assistantPromptValue : "") %></textarea>
 
-          <button class="btn btn-primary portalops-assistant-send" type="submit">
-            Send
+          <button aria-label="Send prompt" class="btn btn-primary portalops-assistant-send" type="submit">
+            <span aria-hidden="true">↑</span>
           </button>
         </div>
 
@@ -52,7 +44,6 @@ String assistantPageLoadingId =
         </div>
       </form>
 
-      <%@ include file="/components/suggested_prompt_list.jspf" %>
     </div>
   </div>
 </section>
@@ -82,6 +73,24 @@ String assistantPageLoadingId =
     if (conversation) {
       conversation.scrollTop = conversation.scrollHeight;
     }
+
+    function resizePromptInput() {
+      promptInput.style.height = 'auto';
+      promptInput.style.height = Math.min(promptInput.scrollHeight, 160) + 'px';
+    }
+
+    promptInput.addEventListener('input', resizePromptInput);
+    promptInput.addEventListener('keydown', function(event) {
+      if ((event.key === 'Enter') && !event.shiftKey) {
+        event.preventDefault();
+
+        if (promptInput.value.trim()) {
+          form.requestSubmit();
+        }
+      }
+    });
+
+    resizePromptInput();
 
     form.addEventListener('submit', function() {
       var submitButton = form.querySelector('button[type="submit"]');

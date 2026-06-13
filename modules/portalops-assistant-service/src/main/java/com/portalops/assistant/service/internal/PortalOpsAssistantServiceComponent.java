@@ -2,9 +2,13 @@ package com.portalops.assistant.service.internal;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.petra.string.StringBundler;
 
 import com.portalops.agent.user.agent.UserAgent;
 import com.portalops.agent.user.dto.AgentResponse;
+import com.portalops.agent.user.dto.UserData;
+import com.portalops.agent.user.dto.UsersData;
 import com.portalops.ai.api.AIProviderType;
 import com.portalops.ai.api.AIRequest;
 import com.portalops.ai.api.AIResponse;
@@ -13,6 +17,8 @@ import com.portalops.assistant.api.PortalOpsContextProvider;
 import com.portalops.assistant.api.PortalOpsExecutionMetadata;
 import com.portalops.assistant.api.PortalOpsAssistantResponse;
 import com.portalops.assistant.api.PortalOpsAssistantService;
+import com.portalops.assistant.api.payload.AssistantPayload;
+import com.portalops.assistant.api.payload.UserFindingsPayload;
 import com.portalops.assistant.service.internal.configuration.PortalOpsAssistantConfiguration;
 import com.portalops.api.service.PortalOpsRequestContext;
 import com.portalops.llm.spi.AIProvider;
@@ -40,51 +46,58 @@ public class PortalOpsAssistantServiceComponent
     public PortalOpsAssistantResponse<?> chat(
             String prompt, PortalOpsRequestContext portalOpsRequestContext) {
 
+        AIProvider aiProvider = _aiProviders.get(_providerType);
+
+        if (aiProvider == null) {
+            return _getProviderUnavailableResponse();
+        }
+
         if (_isUserManagementPrompt(prompt)) {
             AgentResponse agentResponse = _userAgent.execute(prompt);
-            _portalOpsContextProvider.recordExecution(
-                    new PortalOpsExecutionMetadata(
-                            _toExecutionPath(agentResponse),
-                            agentResponse.getFindings(),
-                            agentResponse.getMessage()));
 
             if (_log.isInfoEnabled()) {
                 _log.info("Routed assistant prompt to UserManagementAgent");
             }
 
-            return new PortalOpsAssistantResponse<>(
-                    agentResponse.isSuccess() ? AssistantStatus.SUCCESS :
-                            AssistantStatus.ERROR,
-                    "User Management",
-                    agentResponse.getMessage(),
-                    List.of(
-                            "Execution path: " +
-                                    String.join(" -> ", _toExecutionPath(agentResponse))),
-                    agentResponse.isSuccess() ? List.of() :
-                            List.of(
-                                    "Retry with a user count prompt such as 'How many users are in the portal?'"),
-                    List.of(), null);
+            if (!agentResponse.isSuccess()) {
+                return new PortalOpsAssistantResponse<>(
+                        AssistantStatus.ERROR, "User Management",
+                        "PortalOps could not collect user data.",
+                        List.of("Error code: " + agentResponse.getErrorCode()),
+                        List.of(
+                                "Verify the UserManagementAgent, GetUsers skill, and GetUsersTool services are active."),
+                        List.of(), null);
+            }
+
+            PortalOpsExecutionMetadata portalOpsExecutionMetadata =
+                    new PortalOpsExecutionMetadata(
+                            JSONFactoryUtil.looseSerializeDeep(
+                                    agentResponse.getData()),
+                            _toExecutionPath(agentResponse));
+
+            return _completeWithOpenAI(
+                    aiProvider, prompt, portalOpsRequestContext,
+                    portalOpsExecutionMetadata,
+                    _toUserFindingsPayload(
+                            (UsersData)agentResponse.getData()));
         }
 
-        AIProvider aiProvider = _aiProviders.get(_providerType);
+        return _completeWithOpenAI(
+                aiProvider, prompt, portalOpsRequestContext, null, null);
+    }
 
-        if (aiProvider == null) {
-            return new PortalOpsAssistantResponse<>(
-                    AssistantStatus.ERROR, "Assistant Provider Unavailable",
-                    "PortalOps could not find a provider for " + _providerType +
-                            ".",
-                    List.of(
-                            "No AI provider is registered for the configured provider type."),
-                    List.of(
-                            "Review PortalOps Assistant system settings and provider module deployment."),
-                    List.of(), null);
-        }
+    private PortalOpsAssistantResponse<?> _completeWithOpenAI(
+            AIProvider aiProvider, String prompt,
+            PortalOpsRequestContext portalOpsRequestContext,
+            PortalOpsExecutionMetadata portalOpsExecutionMetadata,
+            AssistantPayload assistantPayload) {
 
         AIResponse aiResponse = aiProvider.complete(
                 new AIRequest(
                         prompt, Map.of(), portalOpsRequestContext,
-                        _portalOpsContextProvider.buildRuntimeContext(),
-                        _portalOpsContextProvider.getSystemPrompt()));
+                        _portalOpsContextProvider.buildRuntimeContext(
+                                portalOpsExecutionMetadata),
+                        _getSystemPrompt()));
 
         if (!aiResponse.isSuccess()) {
             return new PortalOpsAssistantResponse<>(
@@ -102,15 +115,26 @@ public class PortalOpsAssistantServiceComponent
                 AssistantStatus.SUCCESS,
                 aiResponse.getProviderType() + " Assistant",
                 aiResponse.getContent(),
+                List.of(), List.of(), List.of(), assistantPayload);
+    }
+
+    private PortalOpsAssistantResponse<?> _getProviderUnavailableResponse() {
+        return new PortalOpsAssistantResponse<>(
+                AssistantStatus.ERROR, "Assistant Provider Unavailable",
+                "PortalOps could not find a provider for " + _providerType +
+                        ".",
                 List.of(
-                        "Provider: " + aiResponse.getProviderType(),
-                        "Model: " + _getValue(aiResponse.getModelName(), "Default")),
-                List.of(), List.of(), null);
+                        "No AI provider is registered for the configured provider type."),
+                List.of(
+                        "Review PortalOps Assistant system settings and provider module deployment."),
+                List.of(), null);
     }
 
     @Activate
     @Modified
     protected void activate(Map<String, Object> properties) {
+        _additionalSystemPrompt = _getString(
+                properties, "additionalSystemPrompt");
         _providerType = _getValue(
                 _getString(properties, "providerType"),
                 AIProviderType.OPENAI.name());
@@ -147,21 +171,52 @@ public class PortalOpsAssistantServiceComponent
         return String.valueOf(value).trim();
     }
 
+    private String _getSystemPrompt() {
+        String systemPrompt = _portalOpsContextProvider.getSystemPrompt();
+
+        if ((_additionalSystemPrompt == null) ||
+            _additionalSystemPrompt.isBlank()) {
+
+            return systemPrompt;
+        }
+
+        return StringBundler.concat(
+                systemPrompt, "\n\nAdditional administrator instructions:\n",
+                _additionalSystemPrompt);
+    }
+
     private boolean _isUserManagementPrompt(String prompt) {
         String normalizedPrompt = prompt.toLowerCase(Locale.ROOT);
 
-        return normalizedPrompt.contains("user") &&
-                (normalizedPrompt.contains("count") ||
-                 normalizedPrompt.contains("how many"));
+        return normalizedPrompt.contains("user");
     }
 
     private List<String> _toExecutionPath(AgentResponse agentResponse) {
         List<String> executionPath = new java.util.ArrayList<>();
 
         executionPath.add("PortalOps Assistant");
+        executionPath.add(_userAgent.getName());
         executionPath.addAll(agentResponse.getExecutionPath());
 
         return executionPath;
+    }
+
+    private UserFindingsPayload _toUserFindingsPayload(UsersData usersData) {
+        int activeUsers = 0;
+        int administratorAccounts = 0;
+
+        for (UserData userData : usersData.getUsers()) {
+            if ("approved".equals(userData.getStatus())) {
+                activeUsers++;
+            }
+
+            if (userData.getRoles().contains("Administrator")) {
+                administratorAccounts++;
+            }
+        }
+
+        return new UserFindingsPayload(
+                activeUsers, administratorAccounts, usersData.getTotalUsers());
     }
 
     private static final Log _log = LogFactoryUtil.getLog(
@@ -169,6 +224,7 @@ public class PortalOpsAssistantServiceComponent
 
     private final Map<String, AIProvider> _aiProviders =
             new ConcurrentHashMap<>();
+    private volatile String _additionalSystemPrompt;
     private volatile String _providerType = AIProviderType.OPENAI.name();
 
     @Reference

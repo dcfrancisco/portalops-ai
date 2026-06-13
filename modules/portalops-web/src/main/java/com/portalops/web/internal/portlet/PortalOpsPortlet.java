@@ -26,6 +26,7 @@ import com.portalops.assistant.api.payload.RecentChangesPayload;
 import com.portalops.assistant.api.payload.SearchHealthPayload;
 import com.portalops.assistant.api.payload.StaleContentPayload;
 import com.portalops.assistant.api.payload.SystemHealthPayload;
+import com.portalops.assistant.api.payload.UserFindingsPayload;
 import com.portalops.api.audit.AuditRecorder;
 import com.portalops.api.knowledge.PortalKnowledgeSnapshot;
 import com.portalops.api.policy.CommandAuthorizer;
@@ -687,6 +688,29 @@ public class PortalOpsPortlet extends MVCPortlet {
         }
 
         if (portalOpsAssistantResponse.getPayload() instanceof
+                UserFindingsPayload) {
+
+            UserFindingsPayload userFindingsPayload =
+                    (UserFindingsPayload)portalOpsAssistantResponse.getPayload();
+
+            return List.of(
+                    new FindingCard(
+                            "User Count",
+                            String.valueOf(userFindingsPayload.getTotalUsers()),
+                            status, "Users in the current portal instance."),
+                    new FindingCard(
+                            "Active Users",
+                            String.valueOf(userFindingsPayload.getActiveUsers()),
+                            status, "Users with approved status."),
+                    new FindingCard(
+                            "Administrator Accounts",
+                            String.valueOf(
+                                    userFindingsPayload.
+                                            getAdministratorAccounts()),
+                            status, "Users assigned the Administrator role."));
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
                 StaleContentPayload) {
 
             StaleContentPayload staleContentPayload =
@@ -767,10 +791,7 @@ public class PortalOpsPortlet extends MVCPortlet {
                             "Recent changes can explain newly observed incidents."));
         }
 
-        return List.of(
-                new FindingCard(
-                        portalOpsAssistantResponse.getTitle(), "1", status,
-                        portalOpsAssistantResponse.getSummary()));
+        return List.of();
     }
 
     private List<Recommendation> _toRecommendations(

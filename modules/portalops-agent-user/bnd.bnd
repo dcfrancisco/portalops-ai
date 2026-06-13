@@ -1,6 +1,6 @@
 Bundle-Name: PortalOps Agent User
 Bundle-SymbolicName: com.portalops.agent.user
 Bundle-Version: 1.0.0
-Export-Package: \
+Export-Package:\
 	com.portalops.agent.user.agent,\
 	com.portalops.agent.user.dto
