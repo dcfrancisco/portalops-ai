@@ -4,6 +4,7 @@ String assistantTurnPrompt =
 PortalOpsAssistantResponse<? extends AssistantPayload> assistantTurnResponse =
     (PortalOpsAssistantResponse<? extends AssistantPayload>)request.getAttribute(
         "PORTALOPS_ASSISTANT_TURN_RESPONSE");
+String assistantTurnSummary = assistantTurnResponse.getSummary().stripIndent();
 %>
 
 <section class="portalops-assistant-turn">
@@ -12,8 +13,6 @@ PortalOpsAssistantResponse<? extends AssistantPayload> assistantTurnResponse =
   </div>
 
   <div class="portalops-chat-message portalops-chat-message-assistant">
-    <div class="portalops-assistant-response-copy portalops-assistant-response-<%= assistantTurnResponse.getStatus().name().toLowerCase() %>">
-      <%= HtmlUtil.escape(assistantTurnResponse.getSummary()) %>
-    </div>
+    <div class="portalops-assistant-response-copy portalops-assistant-response-<%= assistantTurnResponse.getStatus().name().toLowerCase() %>"><%= HtmlUtil.escape(assistantTurnSummary) %></div>
   </div>
 </section>

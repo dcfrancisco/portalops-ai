@@ -543,7 +543,9 @@
 
 .portalops-chat-message-assistant {
   align-items: flex-start;
+  justify-content: flex-start;
   max-width: 46rem;
+  width: 100%;
 }
 
 .portalops-chat-message-user {

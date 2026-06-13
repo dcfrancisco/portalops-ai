@@ -1,0 +1,72 @@
+/* Responsive utility CSS for Liferay pages
+   Place this file in a client extension, theme, or include via link tag.
+*/
+
+/* Fluid images and videos */
+img, picture, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Responsive container */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  box-sizing: border-box;
+}
+
+/* Simple responsive grid */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -12px;
+  margin-right: -12px;
+}
+.col {
+  padding-left: 12px;
+  padding-right: 12px;
+  box-sizing: border-box;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Column sizing helpers */
+.col-1 { flex: 0 0 8.333%; max-width: 8.333%; }
+.col-2 { flex: 0 0 16.666%; max-width: 16.666%; }
+.col-3 { flex: 0 0 25%; max-width: 25%; }
+.col-4 { flex: 0 0 33.333%; max-width: 33.333%; }
+.col-6 { flex: 0 0 50%; max-width: 50%; }
+.col-12 { flex: 0 0 100%; max-width: 100%; }
+
+/* Utility classes */
+.text-center { text-align: center; }
+.hide-on-mobile { display: none; }
+.stack-on-mobile { flex-direction: column; }
+
+/* Breakpoints */
+@media (min-width: 601px) {
+  .hide-on-mobile { display: block; }
+}
+
+@media (max-width: 900px) {
+  /* Tweak paddings and grid for medium screens */
+  .container { padding-left: 12px; padding-right: 12px; }
+  .col-4 { flex: 0 0 50%; max-width: 50%; }
+}
+
+@media (max-width: 600px) {
+  /* Mobile-specific adjustments */
+  .row { margin-left: -8px; margin-right: -8px; }
+  .col { padding-left: 8px; padding-right: 8px; }
+  .stack-on-mobile { flex-direction: column; }
+  .col-3, .col-4 { flex: 0 0 100%; max-width: 100%; }
+  .hide-on-mobile { display: none !important; }
+}
+
+/* Accessibility tweaks */
+button, a { touch-action: manipulation; }
