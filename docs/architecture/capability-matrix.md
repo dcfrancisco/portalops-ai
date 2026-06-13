@@ -21,10 +21,10 @@
 | User Roles | UserManagementAgent | GetUsers | Implemented |
 | User Organizations | UserManagementAgent | GetUsers | Implemented |
 | User Groups | UserManagementAgent | GetUsers | Implemented |
-| Active Users | UserManagementAgent | GetActiveUsers | Planned |
-| Inactive Users | UserManagementAgent | GetInactiveUsers | Planned |
-| Locked Users | UserManagementAgent | GetLockedUsers | Planned |
-| Administrator Review | UserManagementAgent | GetAdministrators | Planned |
+| Active Users | UserManagementAgent | GetActiveUsers | Implemented |
+| Inactive Users | UserManagementAgent | GetInactiveUsers | Implemented |
+| Locked Users | UserManagementAgent | GetLockedUsers | Implemented |
+| Administrator Review | UserManagementAgent | GetAdministrators | Implemented |
 
 ---
 
@@ -32,10 +32,17 @@
 
 | Capability | Agent | Skill | Status |
 | --- | --- | --- | --- |
-| Site Count | SiteManagementAgent | GetSites | Planned |
-| List Sites | SiteManagementAgent | GetSites | Planned |
-| Site Membership | SiteManagementAgent | GetSiteMembership | Planned |
-| Site Activity | SiteManagementAgent | GetSiteActivity | Planned |
+| Site Count | SiteManagementAgent | GetSites | Implemented |
+| List Sites | SiteManagementAgent | GetSites | Implemented |
+| Site Summary | SiteManagementAgent | GetSites | Implemented |
+| Page Counts | SiteManagementAgent | GetSites | Implemented |
+| List Pages by Site | SiteManagementAgent | GetSites | Implemented |
+| List Site and Page Names | SiteManagementAgent | GetSites | Implemented |
+| Site Activity | SiteManagementAgent | GetSites | Implemented |
+| Page Details | SiteManagementAgent | GetSites | Planned |
+| Page Hierarchy Analysis | SiteManagementAgent | GetSites | Planned |
+| Sites Without Pages | SiteManagementAgent | GetSites | Planned |
+| Site Membership Analysis | SiteManagementAgent | GetSites | Planned |
 
 ---
 
@@ -43,9 +50,9 @@
 
 | Capability | Agent | Skill | Status |
 | --- | --- | --- | --- |
-| Search Health | SearchManagementAgent | GetSearchHealth | Planned |
-| Reindex Status | SearchManagementAgent | GetReindexStatus | Planned |
-| Search Errors | SearchManagementAgent | GetSearchErrors | Planned |
+| Search Health | SearchManagementAgent | GetSearchHealth | Implemented |
+| Reindex Status | SearchManagementAgent | GetReindexStatus | Implemented |
+| Search Errors | SearchManagementAgent | GetSearchErrors | Implemented |
 
 ---
 
@@ -53,9 +60,9 @@
 
 | Capability | Agent | Skill | Status |
 | --- | --- | --- | --- |
-| Content Summary | ContentManagementAgent | GetContentSummary | Planned |
-| Expired Content | ContentManagementAgent | GetExpiredContent | Planned |
-| Pending Content | ContentManagementAgent | GetPendingContent | Planned |
+| Content Summary | ContentManagementAgent | GetContentSummary | Implemented |
+| Expired Content | ContentManagementAgent | GetExpiredContent | Implemented |
+| Pending Content | ContentManagementAgent | GetPendingContent | Implemented |
 
 ---
 
@@ -72,10 +79,11 @@
 
 | Capability | Agent | Skill | Status |
 | --- | --- | --- | --- |
-| List Agents | PortalOpsManagementAgent | ListAgents | Planned |
-| List Skills | PortalOpsManagementAgent | ListSkills | Planned |
-| List Capabilities | PortalOpsManagementAgent | ListCapabilities | Planned |
-| Describe Capability | PortalOpsManagementAgent | DescribeCapability | Planned |
+| List Agents | PortalOpsManagementAgent | ListAgents | Implemented |
+| List Skills | PortalOpsManagementAgent | ListSkills | Implemented |
+| List Capabilities | PortalOpsManagementAgent | ListCapabilities | Implemented |
+| Describe Capability | PortalOpsManagementAgent | DescribeCapability | Implemented |
+| List Domains | PortalOpsManagementAgent | ListDomains | Implemented |
 
 ---
 
@@ -83,10 +91,10 @@
 
 | Domain | Status |
 | --- | --- |
-| User Insights | Planned |
-| Site Insights | Planned |
-| Search Insights | Planned |
-| Content Insights | Planned |
+| User Insights | Implemented |
+| Site Insights | Implemented |
+| Search Insights | Implemented |
+| Content Insights | Implemented |
 
 ---
 

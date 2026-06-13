@@ -1,0 +1,6 @@
+Bundle-Name: PortalOps Agent Site
+Bundle-SymbolicName: com.portalops.agent.site
+Bundle-Version: 1.0.0
+Export-Package:\
+	com.portalops.agent.site.agent,\
+	com.portalops.agent.site.dto

@@ -1,6 +1,7 @@
 package com.portalops.agent.user.skill;
 
 import com.portalops.agent.user.dto.AgentResponse;
+import com.portalops.agent.user.dto.UserQueryData;
 import com.portalops.agent.user.dto.UsersData;
 import com.portalops.agent.user.tool.GetUsersTool;
 import com.portalops.api.runtime.PortalOpsSkill;
@@ -20,7 +21,9 @@ public class GetUsersSkill implements Skill {
 		UsersData usersData = _getUsersTool.execute();
 
 		return AgentResponse.success(
-			usersData, List.of(getName(), _getUsersTool.getName()));
+			UserQueryDataFactory.createAll(
+				UserQueryData.TYPE_USERS, usersData),
+			List.of(getName(), _getUsersTool.getName()));
 	}
 
 	@Override
@@ -40,7 +43,8 @@ public class GetUsersSkill implements Skill {
 		return List.of(
 			"Tell me about the users in this portal.",
 			"How many users do we have?",
-			"What do you notice about the users?");
+			"What do you notice about the users?",
+			"List users in this portal.");
 	}
 
 	@Override

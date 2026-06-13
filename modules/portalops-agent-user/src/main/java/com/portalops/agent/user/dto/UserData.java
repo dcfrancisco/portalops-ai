@@ -10,14 +10,19 @@ import java.util.Objects;
 public class UserData implements Serializable {
 
 	public UserData(
-		String createDate, String emailAddress, String fullName,
-		String lastLoginDate, List<String> organizations, List<String> roles,
-		String status, long userId, List<String> userGroups) {
+		boolean active, boolean administrator, String createDate,
+		String emailAddress, String fullName,
+		String lastLoginDate, boolean locked, List<String> organizations,
+		List<String> roles, String status, long userId,
+		List<String> userGroups) {
 
+		_active = active;
+		_administrator = administrator;
 		_createDate = Objects.requireNonNull(createDate);
 		_emailAddress = Objects.requireNonNull(emailAddress);
 		_fullName = Objects.requireNonNull(fullName);
 		_lastLoginDate = lastLoginDate;
+		_locked = locked;
 		_organizations = Collections.unmodifiableList(
 			new ArrayList<>(Objects.requireNonNull(organizations)));
 		_roles = Collections.unmodifiableList(
@@ -64,10 +69,25 @@ public class UserData implements Serializable {
 		return _userId;
 	}
 
+	public boolean isActive() {
+		return _active;
+	}
+
+	public boolean isAdministrator() {
+		return _administrator;
+	}
+
+	public boolean isLocked() {
+		return _locked;
+	}
+
+	private final boolean _active;
+	private final boolean _administrator;
 	private final String _createDate;
 	private final String _emailAddress;
 	private final String _fullName;
 	private final String _lastLoginDate;
+	private final boolean _locked;
 	private final List<String> _organizations;
 	private final List<String> _roles;
 	private final String _status;

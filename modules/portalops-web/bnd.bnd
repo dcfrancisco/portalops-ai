@@ -2,3 +2,4 @@ Bundle-Name: PortalOps Web
 Bundle-SymbolicName: com.portalops.web
 Bundle-Version: 1.0.0
 Web-ContextPath: /portalops-web
+Liferay-Resource-Bundle: content.Language

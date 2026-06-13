@@ -27,6 +27,34 @@ public class UsersData implements Serializable {
 		return _users;
 	}
 
+	public int getActiveUsersCount() {
+		return (int)_users.stream(
+		).filter(
+			UserData::isActive
+		).count();
+	}
+
+	public int getAdministratorAccountsCount() {
+		return (int)_users.stream(
+		).filter(
+			UserData::isAdministrator
+		).count();
+	}
+
+	public int getInactiveUsersCount() {
+		return (int)_users.stream(
+		).filter(
+			userData -> !userData.isActive()
+		).count();
+	}
+
+	public int getLockedUsersCount() {
+		return (int)_users.stream(
+		).filter(
+			UserData::isLocked
+		).count();
+	}
+
 	private final long _companyId;
 	private final List<UserData> _users;
 

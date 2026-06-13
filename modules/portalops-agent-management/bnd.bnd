@@ -1,0 +1,6 @@
+Bundle-Name: PortalOps Agent Management
+Bundle-SymbolicName: com.portalops.agent.management
+Bundle-Version: 1.0.0
+Export-Package:\
+	com.portalops.agent.management.agent,\
+	com.portalops.agent.management.dto
