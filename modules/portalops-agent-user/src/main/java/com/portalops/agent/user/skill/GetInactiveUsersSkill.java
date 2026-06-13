@@ -12,39 +12,38 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 @Component(service = {PortalOpsSkill.class, Skill.class})
-public class GetUsersSkill implements Skill {
+public class GetInactiveUsersSkill implements Skill {
 
-	public static final String NAME = "GetUsers";
+	public static final String NAME = "GetInactiveUsers";
 
 	@Override
 	public Object execute() {
 		UsersData usersData = _getUsersTool.execute();
 
 		return AgentResponse.success(
-			UserQueryDataFactory.createAll(
-				UserQueryData.TYPE_USERS, usersData),
+			UserQueryDataFactory.createFiltered(
+				UserQueryData.TYPE_INACTIVE_USERS, usersData,
+				userData -> !userData.isActive()),
 			List.of(getName(), _getUsersTool.getName()));
 	}
 
 	@Override
 	public List<String> getCapabilities() {
 		return List.of(
-			"Retrieve and analyze users in the current portal instance");
+			"Retrieve inactive users in the current portal instance");
 	}
 
 	@Override
 	public String getDescription() {
-		return "Retrieves structured user and membership data for the " +
-			"current portal instance.";
+		return "Retrieves inactive users in the current portal instance.";
 	}
 
 	@Override
 	public List<String> getExamplePrompts() {
 		return List.of(
-			"Tell me about the users in this portal.",
-			"How many users do we have?",
-			"What do you notice about the users?",
-			"List users in this portal.");
+			"How many inactive users do we have?",
+			"List inactive users in this portal.",
+			"Show inactive accounts.");
 	}
 
 	@Override

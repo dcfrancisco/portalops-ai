@@ -21,10 +21,10 @@
 | User Roles | UserManagementAgent | GetUsers | Implemented |
 | User Organizations | UserManagementAgent | GetUsers | Implemented |
 | User Groups | UserManagementAgent | GetUsers | Implemented |
-| Active Users | UserManagementAgent | GetActiveUsers | Planned |
-| Inactive Users | UserManagementAgent | GetInactiveUsers | Planned |
-| Locked Users | UserManagementAgent | GetLockedUsers | Planned |
-| Administrator Review | UserManagementAgent | GetAdministrators | Planned |
+| Active Users | UserManagementAgent | GetActiveUsers | Implemented |
+| Inactive Users | UserManagementAgent | GetInactiveUsers | Implemented |
+| Locked Users | UserManagementAgent | GetLockedUsers | Implemented |
+| Administrator Review | UserManagementAgent | GetAdministrators | Implemented |
 
 ---
 
@@ -32,10 +32,10 @@
 
 | Capability | Agent | Skill | Status |
 | --- | --- | --- | --- |
-| Site Count | SiteManagementAgent | GetSites | Planned |
-| List Sites | SiteManagementAgent | GetSites | Planned |
-| Site Membership | SiteManagementAgent | GetSiteMembership | Planned |
-| Site Activity | SiteManagementAgent | GetSiteActivity | Planned |
+| Site Count | SiteManagementAgent | GetSites | Implemented |
+| List Sites | SiteManagementAgent | GetSites | Implemented |
+| Site Membership | SiteManagementAgent | GetSiteMembership | Implemented |
+| Site Activity | SiteManagementAgent | GetSiteActivity | Implemented |
 
 ---
 
@@ -53,9 +53,9 @@
 
 | Capability | Agent | Skill | Status |
 | --- | --- | --- | --- |
-| Content Summary | ContentManagementAgent | GetContentSummary | Planned |
-| Expired Content | ContentManagementAgent | GetExpiredContent | Planned |
-| Pending Content | ContentManagementAgent | GetPendingContent | Planned |
+| Content Summary | ContentManagementAgent | GetContentSummary | Implemented |
+| Expired Content | ContentManagementAgent | GetExpiredContent | Implemented |
+| Pending Content | ContentManagementAgent | GetPendingContent | Implemented |
 
 ---
 
@@ -83,10 +83,10 @@
 
 | Domain | Status |
 | --- | --- |
-| User Insights | Planned |
-| Site Insights | Planned |
+| User Insights | Implemented |
+| Site Insights | Implemented |
 | Search Insights | Planned |
-| Content Insights | Planned |
+| Content Insights | Implemented |
 
 ---
 

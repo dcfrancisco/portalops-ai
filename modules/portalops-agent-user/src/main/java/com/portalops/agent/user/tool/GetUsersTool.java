@@ -139,10 +139,13 @@ public class GetUsersTool implements PortalOpsTool {
 	}
 
 	private UserData _toUserData(User user) {
+		List<String> roles = _getRoles(user);
+
 		return new UserData(
+			user.isActive(), roles.contains("Administrator"),
 			_toInstant(user.getCreateDate()), user.getEmailAddress(),
 			user.getFullName(), _toInstant(user.getLastLoginDate()),
-			_getOrganizations(user), _getRoles(user),
+			user.isLockout(), _getOrganizations(user), roles,
 			WorkflowConstants.getStatusLabel(user.getStatus()),
 			user.getUserId(), _getUserGroups(user));
 	}

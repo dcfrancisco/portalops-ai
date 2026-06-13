@@ -6,6 +6,15 @@ import java.util.List;
 
 public interface ContentInspectionService {
 
+    public List<ContentSummary> getContentSummary(
+            PortalOpsRequestContext context);
+
+    public List<ContentSummary> getExpiredContent(
+            PortalOpsRequestContext context);
+
+    public List<ContentSummary> getPendingContent(
+            PortalOpsRequestContext context);
+
     public List<ContentSummary> getStaleContent(
             PortalOpsRequestContext context);
 

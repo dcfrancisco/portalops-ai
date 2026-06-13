@@ -5,12 +5,17 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 
 import com.portalops.agent.user.dto.AgentRequest;
 import com.portalops.agent.user.dto.AgentResponse;
+import com.portalops.agent.user.skill.GetActiveUsersSkill;
+import com.portalops.agent.user.skill.GetAdministratorsSkill;
+import com.portalops.agent.user.skill.GetInactiveUsersSkill;
+import com.portalops.agent.user.skill.GetLockedUsersSkill;
 import com.portalops.agent.user.skill.GetUsersSkill;
 import com.portalops.agent.user.skill.Skill;
 import com.portalops.api.runtime.PortalOpsAgent;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -30,12 +35,13 @@ public class UserManagementAgent implements UserAgent {
 			return AgentResponse.failure("EMPTY_USER_REQUEST");
 		}
 
-		Skill skill = _getSkill(GetUsersSkill.NAME);
+		String skillName = _resolveSkillName(agentRequest.getPrompt());
+		Skill skill = _getSkill(skillName);
 
 		if (skill == null) {
 			_log.error(
-				"Unable to execute user request because GetUsers is " +
-					"unavailable");
+				"Unable to execute user request because " + skillName +
+					" is unavailable");
 
 			return AgentResponse.failure("USER_SKILL_UNAVAILABLE");
 		}
@@ -70,7 +76,12 @@ public class UserManagementAgent implements UserAgent {
 	@Override
 	public List<String> getCapabilities() {
 		return List.of(
-			"Retrieve and analyze users in the current portal instance");
+			"Retrieve and analyze users in the current portal instance",
+			"Retrieve active users in the current portal instance",
+			"Retrieve inactive users in the current portal instance",
+			"Retrieve locked users in the current portal instance",
+			"Retrieve administrator accounts in the current portal " +
+				"instance");
 	}
 
 	@Override
@@ -85,7 +96,10 @@ public class UserManagementAgent implements UserAgent {
 
 	@Override
 	public List<String> getSupportedSkills() {
-		return List.of(GetUsersSkill.NAME);
+		return List.of(
+			GetUsersSkill.NAME, GetActiveUsersSkill.NAME,
+			GetInactiveUsersSkill.NAME, GetLockedUsersSkill.NAME,
+			GetAdministratorsSkill.NAME);
 	}
 
 	private Skill _getSkill(String name) {
@@ -96,6 +110,44 @@ public class UserManagementAgent implements UserAgent {
 		}
 
 		return null;
+	}
+
+	private String _resolveSkillName(String prompt) {
+		String normalizedPrompt = prompt.toLowerCase(Locale.ROOT);
+
+		if (_containsAny(
+				normalizedPrompt, "administrator", "administrators",
+				"admin account", "admin accounts", "admin user",
+				"admin users")) {
+
+			return GetAdministratorsSkill.NAME;
+		}
+
+		if (_containsAny(normalizedPrompt, "locked", "lockout")) {
+			return GetLockedUsersSkill.NAME;
+		}
+
+		if (normalizedPrompt.contains("inactive")) {
+			return GetInactiveUsersSkill.NAME;
+		}
+
+		if (_containsAny(normalizedPrompt, "active user", "active users",
+				"approved user", "approved users")) {
+
+			return GetActiveUsersSkill.NAME;
+		}
+
+		return GetUsersSkill.NAME;
+	}
+
+	private boolean _containsAny(String value, String... candidates) {
+		for (String candidate : candidates) {
+			if (value.contains(candidate)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

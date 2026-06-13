@@ -179,6 +179,12 @@ public class PortalOpsMockDashboardDataProviderComponent
                         "Analyze",
                         List.of(
                                 "Show System Health", "Show Stale Content",
+                                "Tell me about the sites in this portal.",
+                                "Show site membership",
+                                "Show site activity",
+                                "Tell me about the content in this portal.",
+                                "Show expired content",
+                                "Show pending content",
                                 "Analyze Search Health",
                                 "Review Permission Risks",
                                 "Show Recent Changes",

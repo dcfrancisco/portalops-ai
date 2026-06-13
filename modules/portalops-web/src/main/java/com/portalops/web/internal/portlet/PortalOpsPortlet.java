@@ -20,10 +20,12 @@ import com.portalops.assistant.api.PortalOpsAssistantRequest;
 import com.portalops.assistant.api.PortalOpsAssistantResponse;
 import com.portalops.assistant.api.PortalOpsAssistantService;
 import com.portalops.assistant.api.payload.AssistantPayload;
+import com.portalops.assistant.api.payload.ContentFindingsPayload;
 import com.portalops.assistant.api.payload.FailedWorkflowPayload;
 import com.portalops.assistant.api.payload.PermissionRiskPayload;
 import com.portalops.assistant.api.payload.RecentChangesPayload;
 import com.portalops.assistant.api.payload.SearchHealthPayload;
+import com.portalops.assistant.api.payload.SiteFindingsPayload;
 import com.portalops.assistant.api.payload.StaleContentPayload;
 import com.portalops.assistant.api.payload.SystemHealthPayload;
 import com.portalops.assistant.api.payload.UserFindingsPayload;
@@ -721,7 +723,59 @@ public class PortalOpsPortlet extends MVCPortlet {
         if (portalOpsAssistantResponse.getPayload() instanceof
                 UserFindingsPayload) {
 
-            return "User-related operational context from the current assistant response.";
+            UserFindingsPayload userFindingsPayload =
+                    (UserFindingsPayload)portalOpsAssistantResponse.getPayload();
+
+            switch (userFindingsPayload.getQueryType()) {
+                case "active-users":
+                    return "Active user context from the current assistant response.";
+                case "inactive-users":
+                    return "Inactive user context from the current assistant response.";
+                case "locked-users":
+                    return "Locked user context from the current assistant response.";
+                case "administrators":
+                    return "Administrator account context from the current assistant response.";
+                default:
+                    return "User-related operational context from the current assistant response.";
+            }
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                SiteFindingsPayload) {
+
+            SiteFindingsPayload siteFindingsPayload =
+                    (SiteFindingsPayload)portalOpsAssistantResponse.getPayload();
+
+            if ("site-membership".equals(siteFindingsPayload.getQueryType())) {
+                return "Site membership context from the current assistant response.";
+            }
+
+            if ("site-activity".equals(siteFindingsPayload.getQueryType())) {
+                return "Site activity context from the current assistant response.";
+            }
+
+            return "Site context from the current assistant response.";
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                ContentFindingsPayload) {
+
+            ContentFindingsPayload contentFindingsPayload =
+                    (ContentFindingsPayload)portalOpsAssistantResponse.getPayload();
+
+            if ("expired-content".equals(
+                    contentFindingsPayload.getQueryType())) {
+
+                return "Expired content context from the current assistant response.";
+            }
+
+            if ("pending-content".equals(
+                    contentFindingsPayload.getQueryType())) {
+
+                return "Pending content context from the current assistant response.";
+            }
+
+            return "Content context from the current assistant response.";
         }
 
         if (portalOpsAssistantResponse.getPayload() instanceof
@@ -796,21 +850,250 @@ public class PortalOpsPortlet extends MVCPortlet {
             UserFindingsPayload userFindingsPayload =
                     (UserFindingsPayload)portalOpsAssistantResponse.getPayload();
 
-            return List.of(
-                    new FindingCard(
-                            "User Count",
-                            String.valueOf(userFindingsPayload.getTotalUsers()),
-                            status, "Users in the current portal instance."),
-                    new FindingCard(
-                            "Active Users",
-                            String.valueOf(userFindingsPayload.getActiveUsers()),
-                            status, "Users with approved status."),
-                    new FindingCard(
-                            "Administrator Accounts",
-                            String.valueOf(
-                                    userFindingsPayload.
-                                            getAdministratorAccounts()),
-                            status, "Users assigned the Administrator role."));
+            switch (userFindingsPayload.getQueryType()) {
+                case "active-users":
+                    return List.of(
+                            new FindingCard(
+                                    "Active Users",
+                                    String.valueOf(
+                                            userFindingsPayload.getMatchingUsers()),
+                                    status,
+                                    "Active users returned for the current portal instance."),
+                            new FindingCard(
+                                    "Inactive Users",
+                                    String.valueOf(
+                                            userFindingsPayload.getInactiveUsers()),
+                                    "info",
+                                    "Inactive users remain outside the active user set."),
+                            new FindingCard(
+                                    "Total Users",
+                                    String.valueOf(
+                                            userFindingsPayload.getTotalUsers()),
+                                    "info",
+                                    "Total users in the current portal instance."));
+                case "inactive-users":
+                    return List.of(
+                            new FindingCard(
+                                    "Inactive Users",
+                                    String.valueOf(
+                                            userFindingsPayload.getMatchingUsers()),
+                                    status,
+                                    "Inactive users returned for the current portal instance."),
+                            new FindingCard(
+                                    "Active Users",
+                                    String.valueOf(
+                                            userFindingsPayload.getActiveUsers()),
+                                    "info",
+                                    "Active users are still available in the current portal."),
+                            new FindingCard(
+                                    "Total Users",
+                                    String.valueOf(
+                                            userFindingsPayload.getTotalUsers()),
+                                    "info",
+                                    "Total users in the current portal instance."));
+                case "locked-users":
+                    return List.of(
+                            new FindingCard(
+                                    "Locked Users",
+                                    String.valueOf(
+                                            userFindingsPayload.getMatchingUsers()),
+                                    status,
+                                    "Locked accounts currently returned for review."),
+                            new FindingCard(
+                                    "Administrator Accounts",
+                                    String.valueOf(
+                                            userFindingsPayload.
+                                                    getAdministratorAccounts()),
+                                    "info",
+                                    "Administrator assignments help gauge operational risk."),
+                            new FindingCard(
+                                    "Total Users",
+                                    String.valueOf(
+                                            userFindingsPayload.getTotalUsers()),
+                                    "info",
+                                    "Total users in the current portal instance."));
+                case "administrators":
+                    return List.of(
+                            new FindingCard(
+                                    "Administrator Accounts",
+                                    String.valueOf(
+                                            userFindingsPayload.getMatchingUsers()),
+                                    status,
+                                    "Users assigned the Administrator role."),
+                            new FindingCard(
+                                    "Locked Users",
+                                    String.valueOf(
+                                            userFindingsPayload.getLockedUsers()),
+                                    "info",
+                                    "Locked accounts may affect administrator coverage."),
+                            new FindingCard(
+                                    "Total Users",
+                                    String.valueOf(
+                                            userFindingsPayload.getTotalUsers()),
+                                    "info",
+                                    "Total users in the current portal instance."));
+                default:
+                    return List.of(
+                            new FindingCard(
+                                    "User Count",
+                                    String.valueOf(
+                                            userFindingsPayload.getTotalUsers()),
+                                    status,
+                                    "Users in the current portal instance."),
+                            new FindingCard(
+                                    "Active Users",
+                                    String.valueOf(
+                                            userFindingsPayload.getActiveUsers()),
+                                    status,
+                                    "Active users in the current portal instance."),
+                            new FindingCard(
+                                    "Administrator Accounts",
+                                    String.valueOf(
+                                            userFindingsPayload.
+                                                    getAdministratorAccounts()),
+                                    status,
+                                    "Users assigned the Administrator role."));
+            }
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                SiteFindingsPayload) {
+
+            SiteFindingsPayload siteFindingsPayload =
+                    (SiteFindingsPayload)portalOpsAssistantResponse.getPayload();
+
+            switch (siteFindingsPayload.getQueryType()) {
+                case "site-membership":
+                    return List.of(
+                            new FindingCard(
+                                    "Sites Reviewed",
+                                    String.valueOf(
+                                            siteFindingsPayload.getMatchedSites()),
+                                    status,
+                                    "Sites returned for membership review."),
+                            new FindingCard(
+                                    "Total Memberships",
+                                    String.valueOf(
+                                            siteFindingsPayload.getTotalMemberships()),
+                                    "info",
+                                    "Direct memberships across the current site set."),
+                            new FindingCard(
+                                    "Active Sites",
+                                    String.valueOf(
+                                            siteFindingsPayload.getActiveSites()),
+                                    "info",
+                                    "Active sites in the current portal instance."));
+                case "site-activity":
+                    return List.of(
+                            new FindingCard(
+                                    "Sites Reviewed",
+                                    String.valueOf(
+                                            siteFindingsPayload.getMatchedSites()),
+                                    status,
+                                    "Sites returned for activity review."),
+                            new FindingCard(
+                                    "Public Pages",
+                                    String.valueOf(
+                                            siteFindingsPayload.getTotalPublicPages()),
+                                    "info",
+                                    "Public pages across the current site set."),
+                            new FindingCard(
+                                    "Private Pages",
+                                    String.valueOf(
+                                            siteFindingsPayload.getTotalPrivatePages()),
+                                    "info",
+                                    "Private pages across the current site set."));
+                default:
+                    return List.of(
+                            new FindingCard(
+                                    "Site Count",
+                                    String.valueOf(
+                                            siteFindingsPayload.getTotalSites()),
+                                    status,
+                                    "Sites in the current portal instance."),
+                            new FindingCard(
+                                    "Active Sites",
+                                    String.valueOf(
+                                            siteFindingsPayload.getActiveSites()),
+                                    "info",
+                                    "Active sites in the current portal instance."),
+                            new FindingCard(
+                                    "Total Memberships",
+                                    String.valueOf(
+                                            siteFindingsPayload.getTotalMemberships()),
+                                    "info",
+                                    "Direct memberships across the current site set."));
+            }
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                ContentFindingsPayload) {
+
+            ContentFindingsPayload contentFindingsPayload =
+                    (ContentFindingsPayload)portalOpsAssistantResponse.getPayload();
+
+            switch (contentFindingsPayload.getQueryType()) {
+                case "expired-content":
+                    return List.of(
+                            new FindingCard(
+                                    "Expired Content",
+                                    String.valueOf(
+                                            contentFindingsPayload.getMatchedContent()),
+                                    status,
+                                    "Expired content returned for review."),
+                            new FindingCard(
+                                    "Pending Content",
+                                    String.valueOf(
+                                            contentFindingsPayload.getPendingContent()),
+                                    "info",
+                                    "Pending content that still requires workflow action."),
+                            new FindingCard(
+                                    "Total Content",
+                                    String.valueOf(
+                                            contentFindingsPayload.getTotalContent()),
+                                    "info",
+                                    "Content items in the current portal instance."));
+                case "pending-content":
+                    return List.of(
+                            new FindingCard(
+                                    "Pending Content",
+                                    String.valueOf(
+                                            contentFindingsPayload.getMatchedContent()),
+                                    status,
+                                    "Pending content returned for review."),
+                            new FindingCard(
+                                    "Expired Content",
+                                    String.valueOf(
+                                            contentFindingsPayload.getExpiredContent()),
+                                    "info",
+                                    "Expired content still present in the current portal."),
+                            new FindingCard(
+                                    "Total Content",
+                                    String.valueOf(
+                                            contentFindingsPayload.getTotalContent()),
+                                    "info",
+                                    "Content items in the current portal instance."));
+                default:
+                    return List.of(
+                            new FindingCard(
+                                    "Content Count",
+                                    String.valueOf(
+                                            contentFindingsPayload.getTotalContent()),
+                                    status,
+                                    "Content items in the current portal instance."),
+                            new FindingCard(
+                                    "Expired Content",
+                                    String.valueOf(
+                                            contentFindingsPayload.getExpiredContent()),
+                                    "info",
+                                    "Expired content requiring review."),
+                            new FindingCard(
+                                    "Pending Content",
+                                    String.valueOf(
+                                            contentFindingsPayload.getPendingContent()),
+                                    "info",
+                                    "Pending content still in workflow."));
+            }
         }
 
         if (portalOpsAssistantResponse.getPayload() instanceof

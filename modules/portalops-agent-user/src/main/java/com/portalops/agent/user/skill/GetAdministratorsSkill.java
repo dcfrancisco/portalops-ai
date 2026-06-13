@@ -1,6 +1,7 @@
 package com.portalops.agent.user.skill;
 
 import com.portalops.agent.user.dto.AgentResponse;
+import com.portalops.agent.user.dto.UserData;
 import com.portalops.agent.user.dto.UserQueryData;
 import com.portalops.agent.user.dto.UsersData;
 import com.portalops.agent.user.tool.GetUsersTool;
@@ -12,39 +13,40 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 @Component(service = {PortalOpsSkill.class, Skill.class})
-public class GetUsersSkill implements Skill {
+public class GetAdministratorsSkill implements Skill {
 
-	public static final String NAME = "GetUsers";
+	public static final String NAME = "GetAdministrators";
 
 	@Override
 	public Object execute() {
 		UsersData usersData = _getUsersTool.execute();
 
 		return AgentResponse.success(
-			UserQueryDataFactory.createAll(
-				UserQueryData.TYPE_USERS, usersData),
+			UserQueryDataFactory.createFiltered(
+				UserQueryData.TYPE_ADMINISTRATORS, usersData,
+				UserData::isAdministrator),
 			List.of(getName(), _getUsersTool.getName()));
 	}
 
 	@Override
 	public List<String> getCapabilities() {
 		return List.of(
-			"Retrieve and analyze users in the current portal instance");
+			"Retrieve administrator accounts in the current portal " +
+				"instance");
 	}
 
 	@Override
 	public String getDescription() {
-		return "Retrieves structured user and membership data for the " +
-			"current portal instance.";
+		return "Retrieves administrator accounts for the current portal " +
+			"instance.";
 	}
 
 	@Override
 	public List<String> getExamplePrompts() {
 		return List.of(
-			"Tell me about the users in this portal.",
-			"How many users do we have?",
-			"What do you notice about the users?",
-			"List users in this portal.");
+			"Who are the administrators in this portal?",
+			"How many administrator accounts do we have?",
+			"Review administrator assignments.");
 	}
 
 	@Override

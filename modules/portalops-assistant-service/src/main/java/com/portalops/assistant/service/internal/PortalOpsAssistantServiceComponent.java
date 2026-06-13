@@ -5,10 +5,13 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.petra.string.StringBundler;
 
+import com.portalops.api.content.ContentInspectionService;
+import com.portalops.api.content.ContentSummary;
+import com.portalops.api.site.SiteInspectionService;
+import com.portalops.api.site.SiteSummary;
 import com.portalops.agent.user.agent.UserAgent;
 import com.portalops.agent.user.dto.AgentResponse;
-import com.portalops.agent.user.dto.UserData;
-import com.portalops.agent.user.dto.UsersData;
+import com.portalops.agent.user.dto.UserQueryData;
 import com.portalops.ai.api.AIProviderType;
 import com.portalops.ai.api.AIRequest;
 import com.portalops.ai.api.AIResponse;
@@ -18,6 +21,8 @@ import com.portalops.assistant.api.PortalOpsExecutionMetadata;
 import com.portalops.assistant.api.PortalOpsAssistantResponse;
 import com.portalops.assistant.api.PortalOpsAssistantService;
 import com.portalops.assistant.api.payload.AssistantPayload;
+import com.portalops.assistant.api.payload.ContentFindingsPayload;
+import com.portalops.assistant.api.payload.SiteFindingsPayload;
 import com.portalops.assistant.api.payload.UserFindingsPayload;
 import com.portalops.assistant.service.internal.configuration.PortalOpsAssistantConfiguration;
 import com.portalops.api.service.PortalOpsRequestContext;
@@ -25,6 +30,7 @@ import com.portalops.llm.spi.AIProvider;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -65,7 +71,7 @@ public class PortalOpsAssistantServiceComponent
                         "PortalOps could not collect user data.",
                         List.of("Error code: " + agentResponse.getErrorCode()),
                         List.of(
-                                "Verify the UserManagementAgent, GetUsers skill, and GetUsersTool services are active."),
+                                "Verify the UserManagementAgent and related user skills are active."),
                         List.of(), null);
             }
 
@@ -79,7 +85,21 @@ public class PortalOpsAssistantServiceComponent
                     aiProvider, prompt, portalOpsRequestContext,
                     portalOpsExecutionMetadata,
                     _toUserFindingsPayload(
-                            (UsersData)agentResponse.getData()));
+                            (UserQueryData)agentResponse.getData()));
+        }
+
+        if (_isSiteManagementPrompt(prompt)) {
+            return _completeWithOpenAI(
+                    aiProvider, prompt, portalOpsRequestContext,
+                    _toSiteExecutionMetadata(prompt, portalOpsRequestContext),
+                    _toSiteFindingsPayload(prompt, portalOpsRequestContext));
+        }
+
+        if (_isContentManagementPrompt(prompt)) {
+            return _completeWithOpenAI(
+                    aiProvider, prompt, portalOpsRequestContext,
+                    _toContentExecutionMetadata(prompt, portalOpsRequestContext),
+                    _toContentFindingsPayload(prompt, portalOpsRequestContext));
         }
 
         return _completeWithOpenAI(
@@ -188,7 +208,28 @@ public class PortalOpsAssistantServiceComponent
     private boolean _isUserManagementPrompt(String prompt) {
         String normalizedPrompt = prompt.toLowerCase(Locale.ROOT);
 
-        return normalizedPrompt.contains("user");
+        return normalizedPrompt.contains("user") ||
+                normalizedPrompt.contains("account") ||
+                normalizedPrompt.contains("administrator") ||
+                normalizedPrompt.contains("administrators") ||
+                normalizedPrompt.contains("admin") ||
+                normalizedPrompt.contains("lockout") ||
+                normalizedPrompt.contains("locked");
+    }
+
+    private boolean _isSiteManagementPrompt(String prompt) {
+        String normalizedPrompt = prompt.toLowerCase(Locale.ROOT);
+
+        return normalizedPrompt.contains("site");
+    }
+
+    private boolean _isContentManagementPrompt(String prompt) {
+        String normalizedPrompt = prompt.toLowerCase(Locale.ROOT);
+
+        return normalizedPrompt.contains("content") ||
+                normalizedPrompt.contains("article") ||
+                normalizedPrompt.contains("draft") ||
+                normalizedPrompt.contains("expired");
     }
 
     private List<String> _toExecutionPath(AgentResponse agentResponse) {
@@ -201,22 +242,201 @@ public class PortalOpsAssistantServiceComponent
         return executionPath;
     }
 
-    private UserFindingsPayload _toUserFindingsPayload(UsersData usersData) {
-        int activeUsers = 0;
-        int administratorAccounts = 0;
-
-        for (UserData userData : usersData.getUsers()) {
-            if ("approved".equals(userData.getStatus())) {
-                activeUsers++;
-            }
-
-            if (userData.getRoles().contains("Administrator")) {
-                administratorAccounts++;
-            }
-        }
+    private UserFindingsPayload _toUserFindingsPayload(
+            UserQueryData userQueryData) {
 
         return new UserFindingsPayload(
-                activeUsers, administratorAccounts, usersData.getTotalUsers());
+                userQueryData.getActiveUsers(),
+                userQueryData.getAdministratorAccounts(),
+                userQueryData.getInactiveUsers(),
+                userQueryData.getLockedUsers(),
+                userQueryData.getMatchedUsers(), userQueryData.getQueryType(),
+                userQueryData.getTotalUsers());
+    }
+
+    private AssistantPayload _toContentFindingsPayload(
+            String prompt, PortalOpsRequestContext portalOpsRequestContext) {
+
+        List<ContentSummary> contentSummaries =
+                _getContentSummaries(prompt, portalOpsRequestContext);
+        List<ContentSummary> allContentSummaries =
+                _contentInspectionService.getContentSummary(
+                        portalOpsRequestContext);
+        List<ContentSummary> expiredContentSummaries =
+                _contentInspectionService.getExpiredContent(
+                        portalOpsRequestContext);
+        List<ContentSummary> pendingContentSummaries =
+                _contentInspectionService.getPendingContent(
+                        portalOpsRequestContext);
+
+        return new ContentFindingsPayload(
+                expiredContentSummaries.size(), contentSummaries.size(),
+                pendingContentSummaries.size(), _getContentQueryType(prompt),
+                allContentSummaries.size());
+    }
+
+    private PortalOpsExecutionMetadata _toContentExecutionMetadata(
+            String prompt, PortalOpsRequestContext portalOpsRequestContext) {
+
+        List<ContentSummary> contentSummaries =
+                _getContentSummaries(prompt, portalOpsRequestContext);
+        Map<String, Object> data = new LinkedHashMap<>();
+
+        data.put("queryType", _getContentQueryType(prompt));
+        data.put("totalContent",
+                _contentInspectionService.getContentSummary(
+                        portalOpsRequestContext).size());
+        data.put("expiredContent",
+                _contentInspectionService.getExpiredContent(
+                        portalOpsRequestContext).size());
+        data.put("pendingContent",
+                _contentInspectionService.getPendingContent(
+                        portalOpsRequestContext).size());
+        data.put("content", contentSummaries);
+
+        return new PortalOpsExecutionMetadata(
+                JSONFactoryUtil.looseSerializeDeep(data),
+                List.of(
+                        "PortalOps Assistant",
+                        "PortalOpsContentInspectionService"));
+    }
+
+    private String _getContentQueryType(String prompt) {
+        String normalizedPrompt = prompt.toLowerCase(Locale.ROOT);
+
+        if (normalizedPrompt.contains("expired")) {
+            return "expired-content";
+        }
+
+        if (normalizedPrompt.contains("pending") ||
+            normalizedPrompt.contains("draft")) {
+
+            return "pending-content";
+        }
+
+        return "content-summary";
+    }
+
+    private List<ContentSummary> _getContentSummaries(
+            String prompt, PortalOpsRequestContext portalOpsRequestContext) {
+
+        String queryType = _getContentQueryType(prompt);
+
+        if ("expired-content".equals(queryType)) {
+            return _contentInspectionService.getExpiredContent(
+                    portalOpsRequestContext);
+        }
+
+        if ("pending-content".equals(queryType)) {
+            return _contentInspectionService.getPendingContent(
+                    portalOpsRequestContext);
+        }
+
+        return _contentInspectionService.getContentSummary(
+                portalOpsRequestContext);
+    }
+
+    private AssistantPayload _toSiteFindingsPayload(
+            String prompt, PortalOpsRequestContext portalOpsRequestContext) {
+
+        List<SiteSummary> siteSummaries =
+                _getSiteSummaries(prompt, portalOpsRequestContext);
+        List<SiteSummary> allSiteSummaries = _siteInspectionService.getSites(
+                portalOpsRequestContext);
+
+        return new SiteFindingsPayload(
+                (int)allSiteSummaries.stream(
+                ).filter(
+                        SiteSummary::isActive
+                ).count(),
+                siteSummaries.size(), _getSiteQueryType(prompt),
+                allSiteSummaries.stream(
+                ).mapToInt(
+                        SiteSummary::getUserCount
+                ).sum(),
+                allSiteSummaries.stream(
+                ).mapToInt(
+                        SiteSummary::getPrivatePages
+                ).sum(),
+                allSiteSummaries.stream(
+                ).mapToInt(
+                        SiteSummary::getPublicPages
+                ).sum(),
+                allSiteSummaries.size());
+    }
+
+    private PortalOpsExecutionMetadata _toSiteExecutionMetadata(
+            String prompt, PortalOpsRequestContext portalOpsRequestContext) {
+
+        List<SiteSummary> siteSummaries =
+                _getSiteSummaries(prompt, portalOpsRequestContext);
+        List<SiteSummary> allSiteSummaries = _siteInspectionService.getSites(
+                portalOpsRequestContext);
+        Map<String, Object> data = new LinkedHashMap<>();
+
+        data.put("queryType", _getSiteQueryType(prompt));
+        data.put("totalSites", allSiteSummaries.size());
+        data.put("activeSites",
+                allSiteSummaries.stream(
+                ).filter(
+                        SiteSummary::isActive
+                ).count());
+        data.put("totalMemberships",
+                allSiteSummaries.stream(
+                ).mapToInt(
+                        SiteSummary::getUserCount
+                ).sum());
+        data.put("totalPublicPages",
+                allSiteSummaries.stream(
+                ).mapToInt(
+                        SiteSummary::getPublicPages
+                ).sum());
+        data.put("totalPrivatePages",
+                allSiteSummaries.stream(
+                ).mapToInt(
+                        SiteSummary::getPrivatePages
+                ).sum());
+        data.put("sites", siteSummaries);
+
+        return new PortalOpsExecutionMetadata(
+                JSONFactoryUtil.looseSerializeDeep(data),
+                List.of(
+                        "PortalOps Assistant",
+                        "PortalOpsSiteInspectionService"));
+    }
+
+    private String _getSiteQueryType(String prompt) {
+        String normalizedPrompt = prompt.toLowerCase(Locale.ROOT);
+
+        if (normalizedPrompt.contains("membership") ||
+            normalizedPrompt.contains("member")) {
+
+            return "site-membership";
+        }
+
+        if (normalizedPrompt.contains("activity")) {
+            return "site-activity";
+        }
+
+        return "sites";
+    }
+
+    private List<SiteSummary> _getSiteSummaries(
+            String prompt, PortalOpsRequestContext portalOpsRequestContext) {
+
+        String queryType = _getSiteQueryType(prompt);
+
+        if ("site-membership".equals(queryType)) {
+            return _siteInspectionService.getSiteMembership(
+                    portalOpsRequestContext);
+        }
+
+        if ("site-activity".equals(queryType)) {
+            return _siteInspectionService.getSiteActivity(
+                    portalOpsRequestContext);
+        }
+
+        return _siteInspectionService.getSites(portalOpsRequestContext);
     }
 
     private static final Log _log = LogFactoryUtil.getLog(
@@ -229,6 +449,12 @@ public class PortalOpsAssistantServiceComponent
 
     @Reference
     private PortalOpsContextProvider _portalOpsContextProvider;
+
+    @Reference
+    private ContentInspectionService _contentInspectionService;
+
+    @Reference
+    private SiteInspectionService _siteInspectionService;
 
     @Reference
     private UserAgent _userAgent;

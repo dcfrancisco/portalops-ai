@@ -7,7 +7,9 @@ import com.portalops.api.knowledge.PortalKnowledgeService;
 import com.portalops.api.knowledge.PortalKnowledgeSnapshot;
 import com.portalops.api.knowledge.SiteKnowledge;
 import com.portalops.api.knowledge.WorkflowKnowledge;
+import com.portalops.api.content.ContentInspectionService;
 import com.portalops.api.service.PortalOpsRequestContext;
+import com.portalops.api.site.SiteInspectionService;
 import com.portalops.api.workflow.WorkflowInspectionResult;
 import com.portalops.api.workflow.WorkflowInspectionService;
 
@@ -31,9 +33,12 @@ public class PortalKnowledgeServiceComponent implements PortalKnowledgeService {
                 List.of(), List.of());
 
         ContentKnowledge contentKnowledge = new ContentKnowledge(
-                List.of(), List.of());
+                _contentInspectionService.getStaleContent(context),
+                _contentInspectionService.getUnpublishedDrafts(context));
 
-        SiteKnowledge siteKnowledge = new SiteKnowledge(List.of(), List.of());
+        SiteKnowledge siteKnowledge = new SiteKnowledge(
+                _siteInspectionService.getOrphanedPages(context),
+                _siteInspectionService.getSiteAnomalies(context));
 
         PortalHealthSummary portalHealthSummary = new PortalHealthSummary(
                 0,
@@ -46,6 +51,12 @@ public class PortalKnowledgeServiceComponent implements PortalKnowledgeService {
                 contentKnowledge, permissionKnowledge, portalHealthSummary,
                 siteKnowledge, workflowKnowledge);
     }
+
+    @Reference
+    private ContentInspectionService _contentInspectionService;
+
+    @Reference
+    private SiteInspectionService _siteInspectionService;
 
     @Reference
     private WorkflowInspectionService _workflowInspectionService;
