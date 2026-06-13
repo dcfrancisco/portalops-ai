@@ -91,6 +91,32 @@ Important rules:
 - AI generates the final response using PortalOps runtime context as the source
   of truth.
 
+```mermaid
+flowchart TD
+    A["Administrator Prompt"]
+    B["PortalOps Assistant"]
+    C["Agent"]
+    D["Skill"]
+    E["Tool"]
+    F["Liferay API / Service"]
+    G["Structured Findings"]
+    H["PortalOps Runtime Context"]
+    I["AI Provider"]
+    J["Administrator Response"]
+    K["Findings / Insights / Actions"]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+    G --> I
+    H --> I
+    I --> J
+    J --> K
+```
+
 ## Bundle Model
 
 PortalOps is moving toward a consistent bundle naming model:
