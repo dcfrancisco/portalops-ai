@@ -235,10 +235,18 @@ String assistantFormId =
 
             var currentRoot = currentCard.closest('.portalops-context-shell');
             var replacementRoot = replacementCard.closest('.portalops-context-shell');
+            var currentWorkbench = currentRoot ? currentRoot.closest('.portalops-workbench') : null;
+            var replacementWorkbench = replacementRoot ? replacementRoot.closest('.portalops-workbench') : null;
+            var currentWorkspaceBody = currentWorkbench ? currentWorkbench.querySelector('.portalops-workspace-body') : null;
+            var replacementWorkspaceBody = replacementWorkbench ? replacementWorkbench.querySelector('.portalops-workspace-body') : null;
 
             if (!currentRoot || !replacementRoot) {
               window.location.href = form.action + '?' + searchParams.toString();
               return;
+            }
+
+            if (currentWorkspaceBody && replacementWorkspaceBody) {
+              currentWorkspaceBody.replaceWith(replacementWorkspaceBody);
             }
 
             currentRoot.replaceWith(replacementRoot);

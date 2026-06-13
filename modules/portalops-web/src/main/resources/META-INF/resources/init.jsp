@@ -24,7 +24,6 @@
 <%@ page import="com.portalops.web.internal.display.PortalOpsAssistantInsight" %>
 <%@ page import="com.portalops.web.internal.display.PortalOpsDashboardCard" %>
 <%@ page import="com.portalops.web.internal.display.PortalOpsDashboardData" %>
-<%@ page import="com.portalops.web.internal.display.PortalOpsDashboardInsight" %>
 <%@ page import="com.portalops.web.internal.display.PortalOpsDashboardQuickAction" %>
 <%@ page import="com.portalops.web.internal.display.PortalOpsDashboardSection" %>
 <%@ page import="com.portalops.web.internal.display.PortalOpsNavigationItem" %>

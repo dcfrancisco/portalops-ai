@@ -34,8 +34,11 @@ import com.portalops.api.service.PortalOpsFacade;
 import com.portalops.api.service.PortalOpsRequestContext;
 import com.portalops.web.internal.constants.PortalOpsPortletKeys;
 import com.portalops.web.internal.dashboard.PortalOpsDashboardDataProvider;
+import com.portalops.web.internal.display.DataSourceType;
 import com.portalops.web.internal.display.PortalOpsAssistantConversationTurn;
+import com.portalops.web.internal.display.PortalOpsDashboardCard;
 import com.portalops.web.internal.display.PortalOpsDashboardData;
+import com.portalops.web.internal.display.PortalOpsDashboardSection;
 import com.portalops.web.internal.display.PortalOpsNavigationItem;
 import com.portalops.web.internal.display.PortalOpsSystemHealthData;
 import com.portalops.web.internal.display.PortalOpsViewData;
@@ -119,6 +122,9 @@ public class PortalOpsPortlet extends MVCPortlet {
         PortalOpsDashboardData portalOpsDashboardData =
                 _portalOpsDashboardDataProvider.getPortalOpsDashboardData(
                         portalOpsRequestContext, portalKnowledgeSnapshot);
+        portalOpsDashboardData = portalOpsDashboardData.withInsightsSection(
+                _toInsightsSection(
+                        portalOpsAssistantResponse, portalOpsAnalysisResponse));
         PortalOpsSystemHealthData portalOpsSystemHealthData =
                 new PortalOpsSystemHealthData(
                         FrameworkUtil.getBundle(PortalOpsPortlet.class).
@@ -377,6 +383,24 @@ public class PortalOpsPortlet extends MVCPortlet {
                 _toFindingCards(portalOpsAssistantResponse),
                 _toRecommendations(portalOpsAssistantResponse),
                 _toActionLinks(portalOpsAssistantResponse));
+    }
+
+    private PortalOpsDashboardSection _toInsightsSection(
+            PortalOpsAssistantResponse<? extends AssistantPayload>
+                    portalOpsAssistantResponse,
+            PortalOpsAnalysisResponse portalOpsAnalysisResponse) {
+
+        if ((portalOpsAssistantResponse == null) ||
+            (portalOpsAnalysisResponse == null) ||
+            portalOpsAnalysisResponse.getFindingCards().isEmpty()) {
+
+            return null;
+        }
+
+        return new PortalOpsDashboardSection(
+                "insights", "Insights",
+                _toInsightsDescription(portalOpsAssistantResponse),
+                _toInsightCards(portalOpsAnalysisResponse));
     }
 
     private List<PortalOpsAssistantConversationTurn>
@@ -658,6 +682,85 @@ public class PortalOpsPortlet extends MVCPortlet {
         }
 
         return List.of();
+    }
+
+    private List<PortalOpsDashboardCard> _toInsightCards(
+            PortalOpsAnalysisResponse portalOpsAnalysisResponse) {
+
+        List<PortalOpsDashboardCard> cards = new ArrayList<>();
+
+        for (FindingCard findingCard : portalOpsAnalysisResponse.getFindingCards()) {
+            cards.add(
+                    new PortalOpsDashboardCard(
+                            findingCard.getTitle(), findingCard.getValue(),
+                            findingCard.getStatus(),
+                            _toInsightCardContext(findingCard.getStatus()),
+                            findingCard.getSummary(), DataSourceType.LIVE));
+        }
+
+        return List.copyOf(cards);
+    }
+
+    private String _toInsightCardContext(String status) {
+        switch (status) {
+            case "critical":
+                return "Needs attention";
+            case "warning":
+                return "Review";
+            case "success":
+                return "Healthy";
+            default:
+                return "Current";
+        }
+    }
+
+    private String _toInsightsDescription(
+            PortalOpsAssistantResponse<? extends AssistantPayload>
+                    portalOpsAssistantResponse) {
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                UserFindingsPayload) {
+
+            return "User-related operational context from the current assistant response.";
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                SearchHealthPayload) {
+
+            return "Search-related operational context from the current assistant response.";
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                StaleContentPayload) {
+
+            return "Content-related operational context from the current assistant response.";
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                PermissionRiskPayload) {
+
+            return "Governance-related operational context from the current assistant response.";
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                FailedWorkflowPayload) {
+
+            return "Workflow-related operational context from the current assistant response.";
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                RecentChangesPayload) {
+
+            return "Recent operational change context from the current assistant response.";
+        }
+
+        if (portalOpsAssistantResponse.getPayload() instanceof
+                SystemHealthPayload) {
+
+            return "System health context from the current assistant response.";
+        }
+
+        return "Operational context from the current assistant response.";
     }
 
     private List<FindingCard> _toFindingCards(
