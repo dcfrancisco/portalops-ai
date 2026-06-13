@@ -1,65 +1,131 @@
 # PortalOps
 
-PortalOps is an AI-assisted operations console for Liferay administrators.
+PortalOps is an AI-native operational intelligence platform for enterprise portals, starting with Liferay.
 
-It collects live operational data from Liferay, passes structured findings to an
-AI provider, and returns administrator-focused responses, findings, insights,
-and recommended follow-up actions.
+PortalOps combines portal knowledge, governance, operational data, reasoning, skills, tools, structured outcomes, and workspace rendering into a unified administrative experience. Users express intent, PortalOps performs investigations, gathers evidence, applies governance, and presents findings, actions, and operational workspaces.
 
-This repository is currently Liferay-first and built as a native Liferay
-`portal-7.4-ga132` modular workspace.
-
-## Vision
-
-PortalOps is not meant to be a generic chatbot and not a thin wrapper around
-Liferay services.
-
-The product vision is:
-
-```text
-PortalOps collects operational facts from Liferay
-and AI turns those facts into useful administrative responses.
-```
-
-That means:
-
-- PortalOps is responsible for data collection, execution, security, and
-  Liferay integration.
-- AI is responsible for explanation, summarization, interpretation, and
-  recommendations.
-- The assistant is the primary interaction model.
-- The dashboard, findings, actions, and insights are supporting operational
-  views around the conversation.
+This repository is currently Liferay-first and built as a native Liferay `portal-7.4-ga132` modular workspace.
 
 ## Core Model
 
 ```text
-Prompt -> Agent -> Skill -> Tool -> Liferay -> Structured Data -> AI -> Response
+Intent -> Investigation -> Findings -> Workspace -> Actions
 ```
 
-PortalOps is designed to feel like an operations assistant for administrators,
-not a developer console, not a REST client, and not a static admin dashboard.
+PortalOps is not a chatbot and not a traditional administration dashboard.
+
+The assistant is the primary interaction model.
+
+The dashboard is a supporting view.
 
 ## What PortalOps Is
 
 PortalOps is:
 
-- An administrator-focused AI operations console
-- A modular Liferay application built from domain bundles and agent bundles
-- A structured runtime that separates data collection from response generation
-- A system that prefers counts, summaries, health indicators, risks, and
-  operational insights over unnecessary raw data exposure
+- An intent-driven operational intelligence platform
+- A governance-aware administrative workspace
+- A skills-and-tools orchestration layer for portal investigations
+- A renderer of structured operational outcomes
+- A modular Liferay application built from multiple OSGi capability bundles
 
 PortalOps is not:
 
 - A generic AI chatbot
-- A Java service that hardcodes English responses
 - A dashboard-only product
+- A text-only assistant
 - A monolithic admin application
 
-## Architecture
+## Architectural Principles
 
-PortalOps follows a layered execution model:
+### Intent Driven
+
+Users describe what they want to understand or accomplish.
+
+Examples:
+
+- Review workflow health
+- Find users with excessive permissions
+- Analyze search failures
+- Review stale content
+- Audit role assignments
+
+PortalOps resolves that intent into an investigation path.
+
+### Structured Outcomes
+
+AI does not generate UI directly.
+
+AI and investigation services produce structured outcomes such as:
+
+- Summary
+- Findings
+- Recommendations
+- Actions
+- Workspace Components
+
+PortalOps renders those outcomes through its workspace engine.
+
+### Governance First
+
+Governance is a first-class capability.
+
+PortalOps recommendations must be evaluated against:
+
+- Security Policies
+- Governance Rules
+- Portal Standards
+- Organizational Policies
+
+Governance is authoritative over AI recommendations.
+
+### Knowledge Centric
+
+PortalOps maintains portal-specific knowledge such as:
+
+- Liferay Documentation
+- Portal Administration Guides
+- Governance Policies
+- Runbooks
+- Operational Procedures
+- Internal Knowledge Base
+
+Knowledge is expected to be stored in a vector database and retrieved during investigations.
+
+## Platform Architecture
+
+```mermaid
+flowchart TD
+    Intent["User Intent"]
+    Assistant["PortalOps Assistant"]
+    Investigation["Investigation Engine"]
+    Skills["Skill Runtime"]
+    Tools["Tool Layer"]
+    Knowledge["Knowledge Engine"]
+    Governance["Governance Engine"]
+    AI["AI Runtime"]
+    Outcome["Structured Outcome"]
+    Workspace["Workspace Engine"]
+    Actions["Actions"]
+
+    Intent --> Assistant
+    Assistant --> Investigation
+    Investigation --> Skills
+    Skills --> Tools
+    Investigation --> Knowledge
+    Investigation --> Governance
+    Investigation --> AI
+    Tools --> Outcome
+    Knowledge --> Outcome
+    Governance --> Outcome
+    AI --> Outcome
+    Outcome --> Workspace
+    Workspace --> Actions
+```
+
+## Agent Skill Tool Flow
+
+PortalOps uses a layered execution model that separates operational data
+collection from response generation:
 
 ```text
 PortalOps Assistant
@@ -72,185 +138,105 @@ Tool
     ↓
 Liferay API / Service
     ↓
-Structured Findings
+Structured Data
     ↓
-AI Provider
+OpenAI
     ↓
-Administrator-Facing Response
+Response
 ```
 
-Important rules:
+The first MVP vertical slice is user management:
 
-- Agents, Skills, and Tools do not generate final English prose.
-- They return structured operational data only.
-- AI providers receive:
-  - the user prompt
-  - PortalOps runtime metadata
-  - execution metadata
-  - structured findings
-- AI generates the final response using PortalOps runtime context as the source
-  of truth.
-
-```mermaid
-flowchart TD
-    A["Administrator Prompt"]
-    B["PortalOps Assistant"]
-    C["Agent"]
-    D["Skill"]
-    E["Tool"]
-    F["Liferay API / Service"]
-    G["Structured Findings"]
-    H["PortalOps Runtime Context"]
-    I["AI Provider"]
-    J["Administrator Response"]
-    K["Findings / Insights / Actions"]
-
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    F --> G
-    G --> I
-    H --> I
-    I --> J
-    J --> K
+```text
+PortalOps Assistant
+    ↓
+UserManagementAgent
+    ↓
+GetUsersSkill
+    ↓
+GetUsersTool
+    ↓
+UserLocalService.getCompanyUsers(...)
+    ↓
+Structured User Findings
+    ↓
+OpenAI
+    ↓
+User-Facing Response
 ```
 
-## Bundle Model
+The user tool collects company-scoped operational facts including user identity,
+status, account dates, roles, organizations, and user groups. Skills and agents
+return this data as structured payloads; they do not generate the final English
+response.
 
-PortalOps is moving toward a consistent bundle naming model:
+Example structured result:
 
-- `portalops-agent-<domain>`
-  Agent, skills, tools, execution DTOs, runtime metadata
-- `portalops-<domain>`
-  Shared domain inspection and Liferay-facing services
-- `portalops-assistant-service`
-  Prompt routing, runtime context injection, AI provider handoff
-- `portalops-web`
-  Conversation UI, findings, insights, actions, dashboard rendering
+```json
+{
+  "companyId": 12345,
+  "totalUsers": 1,
+  "users": [
+    {
+      "userId": 20123,
+      "fullName": "Test Test",
+      "emailAddress": "test@liferay.com",
+      "status": "approved",
+      "createDate": "2026-06-12T13:00:00Z",
+      "lastLoginDate": null,
+      "roles": ["Administrator"],
+      "organizations": [],
+      "userGroups": []
+    }
+  ]
+}
+```
 
-Current examples:
+OpenAI receives the original user prompt, registered PortalOps runtime metadata,
+the execution path, and the structured findings. It is responsible for
+explaining, summarizing, interpreting, and recommending actions from those
+facts.
 
-- `portalops-agent-user`
-- `portalops-agent-site`
-- `portalops-agent-content`
-- `portalops-agent-search`
-- `portalops-agent-management`
-- `portalops-site`
-- `portalops-content`
-- `portalops-search`
+## Modular Liferay Direction
 
-## Current Status
+PortalOps should favor multiple Liferay OSGi intelligence modules rather than a single monolithic application.
 
-Implemented MVP domains:
+Core platform modules may include:
 
-- Users
-- Sites
-- Content
-- Search
-- PortalOps self-discovery / management
+- `portalops-core`
+- `portalops-knowledge`
+- `portalops-governance`
+- `portalops-agent-runtime`
+- `portalops-skill-runtime`
+- `portalops-workspace-engine`
 
-Implemented dynamic insight domains:
+Intelligence modules may include:
 
-- User Insights
-- Site Insights
-- Content Insights
-- Search Insights
+- `portalops-user-intelligence`
+- `portalops-role-intelligence`
+- `portalops-content-intelligence`
+- `portalops-workflow-intelligence`
+- `portalops-search-intelligence`
+- `portalops-audit-intelligence`
+- `portalops-system-health-intelligence`
 
-Current implemented capabilities include:
+Each intelligence module may contribute:
 
-- User count and user summaries
-- Active, inactive, locked, and administrator user review
-- Site summaries and page inventory by site
-- Content summaries, expired content, and pending content
-- Search health, reindex status, and search diagnostics
-- Listing PortalOps capabilities, domains, agents, and skills
-- Describing implemented PortalOps domains and capabilities from runtime
-  metadata
+- Knowledge
+- Governance Rules
+- Skills
+- Tools
+- Workspace Components
 
-## Administrator Experience
+## Current MVP Direction
 
-PortalOps should answer questions like:
+Current documentation direction assumes:
 
-- How many users do we have?
-- Tell me about the users in this portal.
-- List sites and page names.
-- Tell me about the content in this portal.
-- How is search doing?
-- Do we need to reindex?
-- What can PortalOps do?
-- Describe Search.
-
-The expected behavior is:
-
-- PortalOps gathers structured facts from Liferay
-- AI responds using PortalOps runtime metadata and findings
-- Insights appear only when relevant cards exist
-- The UI stays administrator-focused and avoids unnecessary implementation
-  detail
-
-## Privacy and Governance Direction
-
-PortalOps should prefer:
-
-- counts
-- summaries
-- trends
-- health indicators
-- anomalies
-- risks
-
-over:
-
-- unnecessary personal details
-- raw payload dumps
-- implementation details
-- developer-centric explanations
-
-Individual identities and lower-level implementation details should only be
-exposed when the user explicitly asks for them or they are necessary for the
-administrative task.
-
-## Roadmap
-
-### Completed
-
-- User domain first real operational slice
-- Site and page read-only inspection
-- Content read-only inspection
-- Search diagnostics MVP
-- PortalOps runtime self-discovery
-- Runtime context injection for AI requests
-- Dynamic Insights section driven by assistant findings
-
-### Next
-
-- Make all implemented domains fully consistent in structure and shared-service
-  reuse
-- Remove remaining duplicated domain retrieval logic where agent bundles and
-  shared domain bundles overlap
-- Strengthen search diagnostics with better freshness and failure signals
-- Improve management/self-discovery descriptions for administrator and
-  developer audiences
-
-### Planned MVP Domains
-
-- Workflow domain
-- Governance and audit expansion
-- System health expansion
-- Permission and security posture expansion
-
-### Out of Scope for Current MVP
-
-- Write operations
-- Automated corrective actions
-- Scheduling and automation
-- Workflow execution
-- Content publishing
-- Search actions
-
-PortalOps remains read-only in the current MVP phase.
+- OpenAI as the first AI provider
+- ChromaDB as the first vector database
+- Assistant-first interaction
+- Structured outcomes rendered into PortalOps workspaces
+- Governance-aware investigations over raw text responses
 
 ## Documentation
 
@@ -269,4 +255,3 @@ Supporting architecture notes:
 - [Response Model](docs/architecture/response-model.md)
 - [AI Provider Architecture](docs/architecture/ai-provider-architecture.md)
 - [Operational Intelligence](docs/architecture/operational-intelligence.md)
-- [Capability Matrix](docs/architecture/capability-matrix.md)
