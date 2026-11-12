@@ -35,6 +35,8 @@ flowchart TD
     Workspace --> Actions
 ```
 
+> Direction update: PortalOps is evolving into an Agent OS with a kernel that plans, authorizes, executes and verifies, including governed write actions. The flow above is the investigation view. See [Agent OS design](architecture/agent-os.md) for the kernel model, target module layering and migration, and [ADR index](adr/README.md) for decisions.
+
 ## Architectural Layers
 
 ### Interaction Layer
@@ -140,7 +142,7 @@ Each intelligence module may contribute:
 Current MVP assumptions:
 
 - OpenAI as the initial AI provider
-- ChromaDB as the initial vector database
+- PostgreSQL with pgvector for knowledge and memory (ADR-0006, supersedes ChromaDB)
 - Assistant-first workflow
 - Structured outcomes instead of text-only responses
 - Dashboard as a supporting surface, not the product center

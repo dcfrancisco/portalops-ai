@@ -47,8 +47,10 @@ flowchart TD
 
 Current direction:
 
-- AI Provider: OpenAI
-- Vector Database: ChromaDB
+- AI Provider: OpenAI (behind a single provider SPI, ADR-0002)
+- Vector Database: PostgreSQL with pgvector (ADR-0006, supersedes ChromaDB)
+
+In the Agent OS model the AI provider proposes plans and tool calls. The kernel validates, authorizes and executes them. See [Agent OS design](architecture/agent-os.md).
 
 Knowledge is expected to be stored in the vector database and retrieved as part of investigations.
 
